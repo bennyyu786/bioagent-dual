@@ -261,7 +261,7 @@ function renderHistory(){
   (historyTasks.map(x=>`<button class="history-entry ${historySelection.kind==='task'&&historySelection.id===x.id?'selected':''}" data-history-task="${escape(x.id)}" title="${escape(x.title)}">${escape(x.title)}<small>${escape(x.status)} · ${escape(x.id.slice(0,12))}</small></button>`).join('')||'<p class="hint">暂无任务</p>')+
   (historyNextTask!==null?'<button class="history-more" id="more-tasks">加载更早的任务</button>':'');
  target.querySelectorAll('[data-session-id]').forEach(btn=>btn.onclick=()=>{chatSession=btn.dataset.sessionId;historySelection={kind:'session',id:chatSession};navigate('home');renderHistory()});
- target.querySelectorAll('[data-history-task]').forEach(btn=>btn.onclick=()=>{historySelection={kind:'task',id:btn.dataset.historyTask};navigate('home');renderHistory()});
+ target.querySelectorAll('[data-history-task]').forEach(btn=>btn.onclick=()=>{historySelection={kind:'task',id:btn.dataset.historyTask};navigate('home');if(el('home-mode'))el('home-mode').value='chat';renderHistory()});
  if(el('more-sessions'))el('more-sessions').onclick=async()=>{
   const r=await api(root()+'/assistant/history?kind=sessions&limit=80&offset='+historySessions.length);
   historySessions.push(...r.items);historyNextSession=r.next_offset;renderHistory();
@@ -327,7 +327,7 @@ async function loadUnifiedChat(){
  if(el('home-input'))el('home-input').placeholder='询问 Biomni，或描述你的任务…';
  try{
   const session=chatSession, d=await api(root()+'/assistant/session/'+encodeURIComponent(session));
-  if(session!==chatSession||!el('home-messages'))return;
+  if(session!==chatSession||historySelection.kind!=='session'||!el('home-messages'))return;
   const html=d.messages.map(m=>{
    const mine=m.role==='user'&&m.author===uid;const linked=d.tasks?.[m.id];
    let task='';
@@ -339,7 +339,7 @@ async function loadUnifiedChat(){
   }).join('');
   if(target.innerHTML!==html){const nearBottom=target.scrollHeight-target.scrollTop-target.clientHeight<90;target.innerHTML=html;if(nearBottom)target.scrollTop=target.scrollHeight;}
   el('home-hero')?.classList.toggle('hidden',d.messages.length>0);
-  target.querySelectorAll('[data-open-task]').forEach(b=>b.onclick=()=>{historySelection={kind:'task',id:b.dataset.openTask};loadUnifiedChat();renderHistory()});
+  target.querySelectorAll('[data-open-task]').forEach(b=>b.onclick=()=>{historySelection={kind:'task',id:b.dataset.openTask};if(el('home-mode'))el('home-mode').value='chat';loadUnifiedChat();renderHistory()});
  }catch(err){if(el('home-status'))el('home-status').textContent=err.message}
 }
 // Each task keeps its own follow-up conversation, separate from other tasks and sessions.
@@ -349,7 +349,6 @@ async function loadSelectedTask(){
  const target=el('home-messages');if(!target||historySelection.kind!=='task')return;
  const id=historySelection.id, workspace=ws;
  if(el('home-selection'))el('home-selection').textContent='历史任务 · '+id;
- if(el('home-mode'))el('home-mode').value='chat';
  if(el('home-input'))el('home-input').placeholder='针对当前任务结果继续追问或追加指令…';
  try{
   const [trace,followups]=await Promise.all([
