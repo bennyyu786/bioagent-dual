@@ -6,3 +6,5 @@
 - Responsive layout hides history column on narrow screens while retaining the icon rail and chat input.
 - Preserves v0.9.2 APIs, state, workspace permissions, task persistence and result decoding.
 - No user database, secret or runtime state included in source distribution.
+
+- Sidebar project list reflects the authenticated user’s real accessible workspaces; selecting one reuses the existing workspace switching and history refresh path.

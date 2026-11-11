@@ -151,6 +151,9 @@ body.unified-home .homeactions .send{background:#191919!important;color:#fff!imp
 @media(max-width:1050px){.shell{grid-template-columns:54px 240px minmax(0,1fr)!important}.history-sidebar{padding-left:8px!important;padding-right:8px!important}.conversation-column{padding:13px 15px 0!important}}
 @media(max-width:720px){.shell{grid-template-columns:50px minmax(0,1fr)!important}.history-sidebar{display:none!important}.conversation-column{grid-column:2!important}.icon-rail{grid-column:1!important}.icon-rail .rail-flyout{left:45px}.conversation-column .topright{gap:5px}}
 
+.history-project{padding:0!important;display:grid;gap:3px;max-height:175px;overflow-y:auto}
+.history-project .project-entry{background:transparent!important;color:#242424!important;text-align:left!important;border:0!important;padding:10px 12px!important;border-radius:10px!important;width:100%;font-size:14px!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.history-project .project-entry:hover,.history-project .project-entry.selected{background:#ececec!important}
 </style></head><body>
 <div id="login" class="login"><div style="font-size:30px">◈</div><h1>Biomni Control Center</h1><p class="muted">Team workspace · 多用户协作控制台</p><form id="login-form"><label>账户邮箱<input id="email" autocomplete="username" required placeholder="operator@example.com"></label><label>密码<input id="password" type="password" autocomplete="current-password" required></label><button class="primary">安全登录</button></form><p class="hint">需要由管理员通过本机 CLI 初始化账户。访问地址必须由 TLS 反向代理保护。</p></div>
 <div id="shell" class="shell hidden">
@@ -174,7 +177,7 @@ body.unified-home .homeactions .send{background:#191919!important;color:#fff!imp
     <div class="history-brand"><strong>Biomni AI</strong><span>0.9.3</span></div>
     <button type="button" id="sidebar-new-chat" class="sidebar-new-chat">✎　新聊天</button>
     <div class="history-project-title">项目</div>
-    <div class="history-project">▱　工作区项目</div>
+    <div class="history-project" id="sidebar-projects" aria-label="工作区项目列表"></div>
     <section id="history-index" class="history-index" aria-label="历史会话与任务"></section>
     <div class="sidebar-footer">所有记录按工作区隔离并持久化保存。</div>
   </aside>
@@ -191,7 +194,7 @@ async function api(path,body,method='GET'){const opts={method,headers:{Authoriza
 const root=()=>'/api/v2/'+encodeURIComponent(ws);
 async function login(e){e.preventDefault();try{const d=await apiPublic('/api/v2/login',{email:el('email').value,password:el('password').value});token=d.token;uid=d.user_id;el('password').value='';await start()}catch(err){toast(err.message)}}
 async function apiPublic(p,b){const r=await fetch(p,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});const d=await r.json();if(!r.ok)throw Error(d.detail||'Login failed');return d}
-async function start(){dagResultCache.clear();dagResultPending.clear();dagResultMode.clear();const m=await api('/api/v2/me');el('email-label').textContent=m.email;el('workspace').innerHTML=m.workspaces.map(w=>`<option value="${escape(w.id)}">${escape(w.title)} · ${escape(w.role)}</option>`).join('');if(!m.workspaces.length)throw Error('No workspaces');ws=m.workspaces[0].id;el('login').classList.add('hidden');el('shell').classList.remove('hidden');await reload();await refreshHistory(true);try{const latest=await api(root()+'/events/history?limit=1');if(latest.events?.length)lastEvent=latest.events[0].id}catch{}connect();refreshTimer=setInterval(reload,10000)}
+async function start(){dagResultCache.clear();dagResultPending.clear();dagResultMode.clear();const m=await api('/api/v2/me');el('email-label').textContent=m.email;el('workspace').innerHTML=m.workspaces.map(w=>`<option value="${escape(w.id)}">${escape(w.title)} · ${escape(w.role)}</option>`).join('');if(!m.workspaces.length)throw Error('No workspaces');ws=m.workspaces[0].id;workspaceProjects=m.workspaces;renderSidebarProjects();el('login').classList.add('hidden');el('shell').classList.remove('hidden');await reload();await refreshHistory(true);try{const latest=await api(root()+'/events/history?limit=1');if(latest.events?.length)lastEvent=latest.events[0].id}catch{}connect();refreshTimer=setInterval(reload,10000)}
 async function reload(){try{const currentWorkspace=ws;data=await api(root()+'/overview');if(page==='topology'){topologyData=await api(root()+'/topology');topologyData.runtime=await api(root()+'/runtime/resources');}if(page==='reviews'){const [q,p]=await Promise.all([api(root()+'/acceptance/queue'),api(root()+'/acceptance/policy')]);acceptanceQueue=q;acceptancePolicy=p;}if(page==='tasks'){graphData=await api(root()+'/graph');if(selectedTask && graphData.nodes.some(n=>n.id===selectedTask)){taskTrace=await api(root()+'/tasks/'+encodeURIComponent(selectedTask)+'/trace')}else{selectedTask=null;taskTrace=null}}if(ws===currentWorkspace){if((page==='reviews'&&el('review-decision-form')))return;if(page==='home'&&el('home-messages'))await loadUnifiedChat();else render()}}catch(e){toast(e.message)}}
 function connect(){if(socket){socket.close();socket=null}el('socket-state').textContent='连接中';api(root()+'/tickets',{},'POST').then(d=>{const wsForSocket=ws;const scheme=location.protocol==='https:'?'wss:':'ws:';socket=new WebSocket(`${scheme}//${location.host}/ws/${encodeURIComponent(ws)}?ticket=${encodeURIComponent(d.ticket)}&after=${lastEvent}`);const thisSocket=socket;socket.onopen=()=>{if(socket===thisSocket)el('socket-state').textContent='实时连接'};socket.onmessage=e=>{if(socket!==thisSocket)return;let evt=JSON.parse(e.data);lastEvent=Math.max(lastEvent,evt.id);onRealtimeEvent(evt)};socket.onclose=()=>{if(socket!==thisSocket)return;el('socket-state').textContent='轮询模式';if(token&&ws===wsForSocket)setTimeout(()=>{if(token&&ws===wsForSocket&&socket?.readyState!==WebSocket.OPEN)connect()},3000)};socket.onerror=()=>{if(socket===thisSocket)el('socket-state').textContent='连接异常'}}).catch(e=>toast(e.message))}
 const fmt=(s)=>escape(s).replace(/\n/g,'<br>');function line(label,meta='',right=''){return `<div class="item"><div><div>${escape(label)}</div><small>${escape(meta)}</small></div><span class="tag">${escape(right)}</span></div>`}
@@ -212,6 +215,17 @@ let homePending=false;
 
 // Durable workspace history and event log are paginated; UI never deletes records.
 let historySessions=[],historyTasks=[],historyNextSession=null,historyNextTask=null;
+let workspaceProjects=[];
+function renderSidebarProjects(){
+ const panel=el('sidebar-projects');if(!panel)return;
+ panel.innerHTML=workspaceProjects.map(p=>`<button type="button" class="project-entry ${p.id===ws?'selected':''}" data-project-workspace="${escape(p.id)}" title="${escape(p.title)}">▱　${escape(p.title)}</button>`).join('')||'<span class="hint">暂无工作区</span>';
+ panel.querySelectorAll('[data-project-workspace]').forEach(btn=>btn.onclick=()=>{
+  if(btn.dataset.projectWorkspace===ws)return;
+  el('workspace').value=btn.dataset.projectWorkspace;
+  el('workspace').dispatchEvent(new Event('change'));
+ });
+}
+
 let eventRows=[],eventNextBefore=null,logFilter='all',logBusy=false;
 async function refreshHistory(reset=true){
  if(reset){historySessions=[];historyTasks=[]}
@@ -469,6 +483,6 @@ async function testModel(){el('model-output').textContent='正在连接...';try{
 async function invite(e){e.preventDefault();try{await api(root()+'/members',{email:el('member-email').value,password:el('member-password').value,role:el('member-role').value},'POST');toast('成员已添加');await reload()}catch(e){toast(e.message)}}
 function appendLog(ev){const t=el('log-stream');if(!t)return;const line=document.createElement('div');line.textContent=`[${new Date(ev.created*1000).toLocaleTimeString()}] ${ev.subject} [${ev.payload?.level}] ${ev.payload?.text}`;t.appendChild(line);if(t.childNodes.length>250)t.removeChild(t.firstChild);t.scrollTop=t.scrollHeight}
 el('sidebar-new-chat').onclick=()=>{chatSession='chat-'+crypto.randomUUID();navigate('home');refreshHistory(true).catch(()=>{})};
-el('login-form').onsubmit=login;el('nav').querySelectorAll('button').forEach(b=>b.onclick=()=>navigate(b.dataset.page));el('workspace').onchange=async()=>{ws=el('workspace').value;chatSession='main';lastEvent=0;selectedTask=null;taskTrace=null;graphData=null;dagResultCache.clear();dagResultPending.clear();dagResultMode.clear();topologyData=null;topologyFocus=null;historySessions=[];historyTasks=[];eventRows=[];eventNextBefore=null;await reload();await refreshHistory(true);connect()};el('logout').onclick=async()=>{try{await api('/api/v2/logout',{},'POST')}catch{}token=null;selectedTask=null;taskTrace=null;dagResultCache.clear();dagResultPending.clear();dagResultMode.clear();if(socket)socket.close();clearInterval(refreshTimer);el('shell').classList.add('hidden');el('login').classList.remove('hidden')};
+el('login-form').onsubmit=login;el('nav').querySelectorAll('button').forEach(b=>b.onclick=()=>navigate(b.dataset.page));el('workspace').onchange=async()=>{ws=el('workspace').value;renderSidebarProjects();chatSession='main';lastEvent=0;selectedTask=null;taskTrace=null;graphData=null;dagResultCache.clear();dagResultPending.clear();dagResultMode.clear();topologyData=null;topologyFocus=null;historySessions=[];historyTasks=[];eventRows=[];eventNextBefore=null;await reload();await refreshHistory(true);connect()};el('logout').onclick=async()=>{try{await api('/api/v2/logout',{},'POST')}catch{}token=null;selectedTask=null;taskTrace=null;dagResultCache.clear();dagResultPending.clear();dagResultMode.clear();if(socket)socket.close();clearInterval(refreshTimer);el('shell').classList.add('hidden');el('login').classList.remove('hidden')};
 })();
 </script></body></html>

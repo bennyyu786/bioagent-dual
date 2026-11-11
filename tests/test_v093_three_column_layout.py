@@ -26,3 +26,10 @@ def test_new_chat_retains_persistence_and_workspace_scoping():
     assert "'/assistant/history?kind=sessions" in html
     assert "'/assistant/history?kind=tasks" in html
     assert '.history-sidebar{display:none!important}' in html
+
+def test_real_workspace_project_switching():
+    html = HTML.read_text(encoding='utf-8')
+    assert 'id="sidebar-projects"' in html
+    assert 'workspaceProjects=m.workspaces' in html
+    assert 'data-project-workspace' in html
+    assert "el('workspace').dispatchEvent(new Event('change'))" in html
