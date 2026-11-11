@@ -1,3 +1,7 @@
+## v0.9.3
+
+- Three-column professional icon rail, durable history/project sidebar and ChatGPT-style conversation/result canvas. See RELEASE_V093.md.
+
 ## v0.9.2
 
 - 统一白底黑字、历史会话/任务索引、完整实时事件日志、任务结果可读化。参见 RELEASE_V092.md。

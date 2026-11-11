@@ -112,9 +112,77 @@ body.unified-home .homeactions .send{background:#191919!important;color:#fff!imp
 .graphview svg .node-rect,.graphshell svg .node-rect,.topoview svg rect{fill:#fff!important;stroke:#9a9a9a!important}
 .graphview svg path,.topoview svg path{stroke:#777!important}
 
+
+/* v0.9.3: screenshot-aligned three-column shell. Rail -> history -> conversation. */
+.shell{display:grid!important;grid-template-columns:58px 304px minmax(0,1fr)!important;min-height:100dvh!important;height:100dvh!important;overflow:hidden}
+.shell.hidden{display:none!important}
+.icon-rail{grid-column:1;grid-row:1;z-index:5;background:#fafafa!important;border-right:1px solid #e8e8e8;min-width:0;padding:8px 4px;overflow:visible}
+.icon-rail nav{display:flex!important;flex-direction:column;align-items:center;gap:10px}
+.icon-rail nav>button,.icon-rail .proviews>summary{display:flex!important;justify-content:center;align-items:center;width:44px!important;height:44px;min-width:44px;padding:0!important;text-align:center!important;border:0!important;background:transparent!important;border-radius:12px!important;font-size:23px!important;line-height:1!important;color:#333!important}
+.icon-rail nav>button:hover,.icon-rail nav>button.active,.icon-rail .proviews>summary:hover{background:#eaeaea!important;color:#111!important}
+.icon-rail .proviews{margin-top:6px;padding-top:13px;border-top:1px solid #e5e5e5;width:100%;position:relative;display:flex;justify-content:center}
+.icon-rail .proviews>summary{list-style:none;cursor:pointer;font-size:24px!important}
+.icon-rail .proviews>summary:before{content:none!important}
+.icon-rail .rail-flyout{position:absolute;z-index:8;left:52px;top:4px;min-width:190px;box-shadow:0 6px 25px #0002;background:#fff;border:1px solid #e4e4e4;border-radius:12px;padding:10px;display:grid;gap:5px}
+.icon-rail .flyout-heading{padding:8px 10px;font-size:13px;color:#777}
+.icon-rail .rail-flyout button{font-size:14px!important;text-align:left!important;white-space:nowrap;padding:11px 12px!important;border:0!important;background:transparent!important}
+.icon-rail .rail-flyout button:hover,.icon-rail .rail-flyout button.active{background:#f0f0f0!important}
+.history-sidebar{grid-column:2;grid-row:1;background:#fafafa!important;border-right:1px solid #e7e7e7!important;display:flex;flex-direction:column;min-width:0;height:100dvh;padding:20px 12px 10px!important;overflow:hidden}
+.history-brand{display:flex;align-items:center;justify-content:space-between;padding:0 10px 18px;gap:8px;font-size:18px;color:#111}
+.history-brand span{font-size:11px;color:#929292}
+.sidebar-new-chat{width:100%;display:block;text-align:left;background:transparent!important;border:0!important;border-radius:12px;padding:12px 11px!important;color:#202020!important;font-size:15px}
+.sidebar-new-chat:hover{background:#ececec!important}
+.history-project-title{color:#858585;font-size:13px;padding:21px 12px 10px}
+.history-project{padding:11px 12px;font-size:14px;color:#222;border-radius:9px}
+.history-index{flex:1;min-height:0;max-height:none!important;overflow-y:auto;scrollbar-width:thin;border-top:0!important;margin:7px 0 0!important;padding:5px 0!important}
+.history-index h3{font-size:13px;margin:12px 9px 7px;color:#848484}
+.history-index .history-entry{font-size:14px!important;padding:10px 11px!important;min-height:39px}
+.history-index .history-entry small{font-size:11px!important;margin-top:3px}
+.sidebar-footer{font-size:11px;color:#8a8a8a;padding:9px 11px;border-top:1px solid #e8e8e8}
+.conversation-column{grid-column:3;grid-row:1;height:100dvh;min-width:0;overflow-y:auto;display:flex;flex-direction:column;padding:16px 26px 0!important;background:#fff!important}
+.conversation-column>.top{flex:0 0 auto;border-bottom:0!important;margin-bottom:0!important;min-height:48px;padding-bottom:8px!important}
+.conversation-column>.top h2{font-size:18px!important;font-weight:600!important}
+.conversation-column>.topright{color:#222!important}
+.conversation-column>#page{flex:1;display:flex;flex-direction:column;min-height:0}
+.conversation-column .homepage{width:min(100%,920px)!important;height:100%;min-height:0!important;flex:1;margin:0 auto;gap:8px}
+.conversation-column .homemessages{max-height:none!important;min-height:0;flex:1}
+.conversation-column .homecomposer{position:sticky;bottom:16px!important;margin-top:auto;background:#fff!important;border-radius:28px!important;box-shadow:0 3px 24px #0000000b!important}
+.conversation-column .homehero{margin:auto 0!important}
+@media(max-width:1050px){.shell{grid-template-columns:54px 240px minmax(0,1fr)!important}.history-sidebar{padding-left:8px!important;padding-right:8px!important}.conversation-column{padding:13px 15px 0!important}}
+@media(max-width:720px){.shell{grid-template-columns:50px minmax(0,1fr)!important}.history-sidebar{display:none!important}.conversation-column{grid-column:2!important}.icon-rail{grid-column:1!important}.icon-rail .rail-flyout{left:45px}.conversation-column .topright{gap:5px}}
+
 </style></head><body>
 <div id="login" class="login"><div style="font-size:30px">◈</div><h1>Biomni Control Center</h1><p class="muted">Team workspace · 多用户协作控制台</p><form id="login-form"><label>账户邮箱<input id="email" autocomplete="username" required placeholder="operator@example.com"></label><label>密码<input id="password" type="password" autocomplete="current-password" required></label><button class="primary">安全登录</button></form><p class="hint">需要由管理员通过本机 CLI 初始化账户。访问地址必须由 TLS 反向代理保护。</p></div>
-<div id="shell" class="shell hidden"><aside><h1>◈ BIOMNI</h1><div class="sub">CONTROL CENTER / TEAM · 0.9.2</div><nav id="nav"><button data-page="home" class="active homenav">◉　Biomni AI</button><details class="proviews" id="professional-views"><summary>专业视图 / 管理</summary><button data-page="overview">◫　运行总览</button><button data-page="tasks">◇　Task Center / DAG</button><button data-page="topology">◎　Capability Center / 拓扑</button><button data-page="workers">▣　Worker 中心</button><button data-page="logs">≡　实时日志</button><button data-page="models">✧　模型连接</button><button data-page="members">♙　团队权限</button></details></nav><section id="history-index" class="history-index" aria-label="历史会话与任务"></section><div class="notice" style="margin-top:30px">安全控制<br><span class="hint">操作按工作区权限校验，任务提交需要明确确认。</span></div></aside><main><header class="top"><div><h2 id="title">运行总览</h2><div class="muted" id="email-label"></div></div><div class="topright"><span id="socket-state" class="tag">连接中</span><select id="workspace"></select><button id="logout">退出</button></div></header><div id="page"></div></main></div><div id="toast" role="status"></div>
+<div id="shell" class="shell hidden">
+  <div class="icon-rail" aria-label="专业配置快捷入口">
+    <nav id="nav" aria-label="专业视图导航">
+      <button type="button" data-page="home" class="active homenav" title="AI 对话首页" aria-label="AI 对话首页">⌂</button>
+      <button type="button" data-page="overview" title="运行总览" aria-label="运行总览">◫</button>
+      <button type="button" data-page="tasks" title="Task Center 与 DAG" aria-label="Task Center 与 DAG">◇</button>
+      <button type="button" data-page="topology" title="Capability Center" aria-label="Capability Center">◎</button>
+      <button type="button" data-page="workers" title="Worker 中心" aria-label="Worker 中心">▣</button>
+      <button type="button" data-page="logs" title="WebSocket 事件与实时日志" aria-label="实时事件与日志">≡</button>
+      <details class="proviews" id="professional-views"><summary title="高级配置" aria-label="高级配置">⚙</summary>
+        <div class="rail-flyout"><div class="flyout-heading">专业配置</div>
+          <button type="button" data-page="models">✧　模型连接</button>
+          <button type="button" data-page="members">♙　团队权限</button>
+        </div>
+      </details>
+    </nav>
+  </div>
+  <aside class="history-sidebar" aria-label="项目与历史会话">
+    <div class="history-brand"><strong>Biomni AI</strong><span>0.9.3</span></div>
+    <button type="button" id="sidebar-new-chat" class="sidebar-new-chat">✎　新聊天</button>
+    <div class="history-project-title">项目</div>
+    <div class="history-project">▱　工作区项目</div>
+    <section id="history-index" class="history-index" aria-label="历史会话与任务"></section>
+    <div class="sidebar-footer">所有记录按工作区隔离并持久化保存。</div>
+  </aside>
+  <main class="conversation-column">
+    <header class="top"><div><h2 id="title">Biomni AI</h2><div class="muted" id="email-label"></div></div><div class="topright"><span id="socket-state" class="tag">连接中</span><select id="workspace" aria-label="当前工作区"></select><button id="logout">退出</button></div></header>
+    <div id="page"></div>
+  </main>
+</div><div id="toast" role="status"></div>
 <script>
 (() => {'use strict';let acceptanceQueue=null,acceptancePolicy=null;const dagResultCache=new Map(),dagResultPending=new Set(),dagResultMode=new Map();let token=null,uid='',ws='',page='home',data={},socket=null,lastEvent=0,refreshTimer=null,graphData=null,selectedTask=null,taskTrace=null,graphSearch='',graphFilter='all',graphZoom=1,topologyData=null,topologyFocus=null,topologySearch='',topologyZoom=1,chatSession='main';
 const el=id=>document.getElementById(id);const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -211,7 +279,7 @@ function renderHome(target){
  el('home-form').onsubmit=sendUnifiedTurn;
  el('home-input').onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();el('home-form').requestSubmit()}};
  el('new-conversation').onclick=()=>{chatSession='chat-'+crypto.randomUUID();loadUnifiedChat();renderHistory()};
- el('home-plus').onclick=()=>{const p=el('professional-views');p.open=!p.open;if(p.open)toast('可从左侧导航打开 DAG、能力和 Worker 专业视图')};
+ el('home-plus').onclick=()=>{const p=el('professional-views');p.open=!p.open;if(p.open)toast('可从最左侧图标栏进入专业视图')};
  const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
  if(!SpeechRecognition){el('home-mic').classList.add('hidden')}
  else el('home-mic').onclick=()=>{
@@ -400,6 +468,7 @@ async function saveModel(e){e.preventDefault();try{await api(root()+'/models/con
 async function testModel(){el('model-output').textContent='正在连接...';try{let d=await api(root()+'/models/probe',{},'POST');el('model-output').textContent=d.connected?'连接成功，发现 '+d.models_found+' 个模型':('连接失败：'+(d.error?.type||'unknown')+(d.error?.http_status?' (HTTP '+d.error.http_status+')':'')+'；'+(d.error?.message||'请检查服务器日志'))}catch(e){el('model-output').textContent=e.message}}
 async function invite(e){e.preventDefault();try{await api(root()+'/members',{email:el('member-email').value,password:el('member-password').value,role:el('member-role').value},'POST');toast('成员已添加');await reload()}catch(e){toast(e.message)}}
 function appendLog(ev){const t=el('log-stream');if(!t)return;const line=document.createElement('div');line.textContent=`[${new Date(ev.created*1000).toLocaleTimeString()}] ${ev.subject} [${ev.payload?.level}] ${ev.payload?.text}`;t.appendChild(line);if(t.childNodes.length>250)t.removeChild(t.firstChild);t.scrollTop=t.scrollHeight}
+el('sidebar-new-chat').onclick=()=>{chatSession='chat-'+crypto.randomUUID();navigate('home');refreshHistory(true).catch(()=>{})};
 el('login-form').onsubmit=login;el('nav').querySelectorAll('button').forEach(b=>b.onclick=()=>navigate(b.dataset.page));el('workspace').onchange=async()=>{ws=el('workspace').value;chatSession='main';lastEvent=0;selectedTask=null;taskTrace=null;graphData=null;dagResultCache.clear();dagResultPending.clear();dagResultMode.clear();topologyData=null;topologyFocus=null;historySessions=[];historyTasks=[];eventRows=[];eventNextBefore=null;await reload();await refreshHistory(true);connect()};el('logout').onclick=async()=>{try{await api('/api/v2/logout',{},'POST')}catch{}token=null;selectedTask=null;taskTrace=null;dagResultCache.clear();dagResultPending.clear();dagResultMode.clear();if(socket)socket.close();clearInterval(refreshTimer);el('shell').classList.add('hidden');el('login').classList.remove('hidden')};
 })();
 </script></body></html>

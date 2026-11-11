@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "biomni-dual-center"
-version = "0.9.2"
+version = "0.9.3"
 description = "Task and capability orchestration extension for Biomni"
 requires-python = ">=3.11"
 dependencies = ["PyYAML>=6.0"]
