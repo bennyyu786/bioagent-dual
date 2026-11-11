@@ -113,6 +113,19 @@ body.unified-home .homeactions .send{background:#191919!important;color:#fff!imp
 .graphview svg path,.topoview svg path{stroke:#777!important}
 
 
+/* v0.9.4: selected history owns the upper result pane; compose stays below. */
+.conversation-column:has(.homepage){overflow:hidden!important}
+.conversation-column .homepage{overflow:hidden;min-height:0!important;display:flex;flex-direction:column}
+.conversation-column .homemessages{overflow-y:auto;min-height:0;flex:1;overscroll-behavior:contain}
+.conversation-column .homecomposer{position:relative!important;bottom:auto!important;flex:0 0 auto;margin-top:auto;margin-bottom:16px}
+.home-selection{font-size:12px;color:#666;overflow-wrap:anywhere}
+.home-task-focus{border:1px solid #e5e5e5;border-radius:12px;padding:16px;background:#fff;margin-bottom:14px;white-space:pre-wrap;overflow-wrap:anywhere}
+.home-task-focus h3{margin:0 0 8px;font-size:16px}
+.home-task-focus .result-view{max-height:none;white-space:pre-wrap}
+.home-task-focus .reviewresult{background:#fff!important;color:#171717!important}
+.home-task-focus .task-meta{font-size:12px;color:#666;margin:6px 0}
+.home-task-followups{border-top:1px solid #ededed;margin-top:16px;padding-top:12px}
+@media(max-width:720px){.conversation-column .homecomposer{margin-bottom:10px}}
 /* v0.9.3: screenshot-aligned three-column shell. Rail -> history -> conversation. */
 .shell{display:grid!important;grid-template-columns:58px 304px minmax(0,1fr)!important;min-height:100dvh!important;height:100dvh!important;overflow:hidden}
 .shell.hidden{display:none!important}
@@ -215,6 +228,7 @@ let homePending=false;
 
 // Durable workspace history and event log are paginated; UI never deletes records.
 let historySessions=[],historyTasks=[],historyNextSession=null,historyNextTask=null;
+let historySelection={kind:'session',id:'main'};
 let workspaceProjects=[];
 function renderSidebarProjects(){
  const panel=el('sidebar-projects');if(!panel)return;
@@ -241,13 +255,13 @@ async function refreshHistory(reset=true){
 function renderHistory(){
  const target=el('history-index');if(!target)return;
  target.innerHTML='<h3>最近 · 历史会话</h3>'+
-  (historySessions.map(x=>`<button class="history-entry ${chatSession===x.id?'selected':''}" data-session-id="${escape(x.id)}" title="${escape(x.preview)}">${escape(x.preview||'新对话')}<small>${escape(x.id)} · ${x.count} 条消息</small></button>`).join('')||'<p class="hint">暂无会话</p>')+
+  (historySessions.map(x=>`<button class="history-entry ${historySelection.kind==='session'&&chatSession===x.id?'selected':''}" data-session-id="${escape(x.id)}" title="${escape(x.preview)}">${escape(x.preview||'新对话')}<small>${escape(x.id)} · ${x.count} 条消息</small></button>`).join('')||'<p class="hint">暂无会话</p>')+
   (historyNextSession!==null?'<button class="history-more" id="more-sessions">加载更早的会话</button>':'')+
   '<h3>提交的任务</h3>'+
-  (historyTasks.map(x=>`<button class="history-entry" data-history-task="${escape(x.id)}" title="${escape(x.title)}">${escape(x.title)}<small>${escape(x.status)} · ${escape(x.id.slice(0,12))}</small></button>`).join('')||'<p class="hint">暂无任务</p>')+
+  (historyTasks.map(x=>`<button class="history-entry ${historySelection.kind==='task'&&historySelection.id===x.id?'selected':''}" data-history-task="${escape(x.id)}" title="${escape(x.title)}">${escape(x.title)}<small>${escape(x.status)} · ${escape(x.id.slice(0,12))}</small></button>`).join('')||'<p class="hint">暂无任务</p>')+
   (historyNextTask!==null?'<button class="history-more" id="more-tasks">加载更早的任务</button>':'');
- target.querySelectorAll('[data-session-id]').forEach(btn=>btn.onclick=()=>{chatSession=btn.dataset.sessionId;navigate('home')});
- target.querySelectorAll('[data-history-task]').forEach(btn=>btn.onclick=()=>{selectedTask=btn.dataset.historyTask;navigate('tasks')});
+ target.querySelectorAll('[data-session-id]').forEach(btn=>btn.onclick=()=>{chatSession=btn.dataset.sessionId;historySelection={kind:'session',id:chatSession};navigate('home');renderHistory()});
+ target.querySelectorAll('[data-history-task]').forEach(btn=>btn.onclick=()=>{historySelection={kind:'task',id:btn.dataset.historyTask};navigate('home');renderHistory()});
  if(el('more-sessions'))el('more-sessions').onclick=async()=>{
   const r=await api(root()+'/assistant/history?kind=sessions&limit=80&offset='+historySessions.length);
   historySessions.push(...r.items);historyNextSession=r.next_offset;renderHistory();
@@ -289,10 +303,10 @@ function onRealtimeEvent(evt){
 }
 
 function renderHome(target){
- target.innerHTML=`<section class="homepage" aria-label="Biomni AI 对话首页"><div class="homehead"><span class="muted">工作区对话 · ${escape(ws)}</span><button id="new-conversation" type="button">＋ 新对话</button></div><div class="homehero" id="home-hero"><h1>有什么可以帮你？</h1><p>可以先提问，也可以描述需要完成的任务。</p></div><div id="home-messages" class="homemessages" aria-live="polite"></div><form id="home-form" class="homecomposer"><textarea id="home-input" rows="2" maxlength="4000" required placeholder="询问 Biomni，或描述你的任务…" aria-label="输入消息"></textarea><div class="homeactions"><div class="home-tools"><button type="button" class="homeplus" id="home-plus" aria-label="展开专业视图" title="展开专业视图">＋</button><select id="home-mode" aria-label="对话模式"><option value="auto">智能判断</option><option value="chat">仅对话</option><option value="task">执行任务</option></select></div><div class="home-tools"><span id="home-status" class="homestatus" role="status"></span><button type="button" id="home-mic" class="homemic" title="语音输入（支持的浏览器）" aria-label="语音输入">♩</button><button class="send" id="home-send" title="发送" aria-label="发送消息">↑</button></div></div></form></section>`;
+ target.innerHTML=`<section class="homepage" aria-label="Biomni AI 对话首页"><div class="homehead"><span id="home-selection" class="home-selection">工作区对话 · ${escape(ws)}</span><button id="new-conversation" type="button">＋ 新对话</button></div><div class="homehero" id="home-hero"><h1>有什么可以帮你？</h1><p>可以先提问，也可以描述需要完成的任务。</p></div><div id="home-messages" class="homemessages" aria-live="polite"></div><form id="home-form" class="homecomposer"><textarea id="home-input" rows="2" maxlength="4000" required placeholder="询问 Biomni，或描述你的任务…" aria-label="输入消息"></textarea><div class="homeactions"><div class="home-tools"><button type="button" class="homeplus" id="home-plus" aria-label="展开专业视图" title="展开专业视图">＋</button><select id="home-mode" aria-label="对话模式"><option value="auto">智能判断</option><option value="chat">仅对话</option><option value="task">执行任务</option></select></div><div class="home-tools"><span id="home-status" class="homestatus" role="status"></span><button type="button" id="home-mic" class="homemic" title="语音输入（支持的浏览器）" aria-label="语音输入">♩</button><button class="send" id="home-send" title="发送" aria-label="发送消息">↑</button></div></div></form></section>`;
  el('home-form').onsubmit=sendUnifiedTurn;
  el('home-input').onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();el('home-form').requestSubmit()}};
- el('new-conversation').onclick=()=>{chatSession='chat-'+crypto.randomUUID();loadUnifiedChat();renderHistory()};
+ el('new-conversation').onclick=()=>{chatSession='chat-'+crypto.randomUUID();historySelection={kind:'session',id:chatSession};loadUnifiedChat();renderHistory()};
  el('home-plus').onclick=()=>{const p=el('professional-views');p.open=!p.open;if(p.open)toast('可从最左侧图标栏进入专业视图')};
  const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
  if(!SpeechRecognition){el('home-mic').classList.add('hidden')}
@@ -308,6 +322,9 @@ function renderHome(target){
 }
 async function loadUnifiedChat(){
  const target=el('home-messages');if(!target)return;
+ if(historySelection.kind==='task'){await loadSelectedTask();return;}
+ if(el('home-selection'))el('home-selection').textContent='Session · '+chatSession;
+ if(el('home-input'))el('home-input').placeholder='询问 Biomni，或描述你的任务…';
  try{
   const session=chatSession, d=await api(root()+'/assistant/session/'+encodeURIComponent(session));
   if(session!==chatSession||!el('home-messages'))return;
@@ -322,22 +339,64 @@ async function loadUnifiedChat(){
   }).join('');
   if(target.innerHTML!==html){const nearBottom=target.scrollHeight-target.scrollTop-target.clientHeight<90;target.innerHTML=html;if(nearBottom)target.scrollTop=target.scrollHeight;}
   el('home-hero')?.classList.toggle('hidden',d.messages.length>0);
-  target.querySelectorAll('[data-open-task]').forEach(b=>b.onclick=()=>{selectedTask=b.dataset.openTask;navigate('tasks')});
+  target.querySelectorAll('[data-open-task]').forEach(b=>b.onclick=()=>{historySelection={kind:'task',id:b.dataset.openTask};loadUnifiedChat();renderHistory()});
  }catch(err){if(el('home-status'))el('home-status').textContent=err.message}
+}
+// Each task keeps its own follow-up conversation, separate from other tasks and sessions.
+// The original task result is read-only; follow-up turns are append-only messages.
+const taskFollowupSession=id=>'task-followup-'+id;
+async function loadSelectedTask(){
+ const target=el('home-messages');if(!target||historySelection.kind!=='task')return;
+ const id=historySelection.id, workspace=ws;
+ if(el('home-selection'))el('home-selection').textContent='历史任务 · '+id;
+ if(el('home-mode'))el('home-mode').value='chat';
+ if(el('home-input'))el('home-input').placeholder='针对当前任务结果继续追问或追加指令…';
+ try{
+  const [trace,followups]=await Promise.all([
+   api(root()+'/tasks/'+encodeURIComponent(id)+'/trace'),
+   api(root()+'/assistant/session/'+encodeURIComponent(taskFollowupSession(id)))
+  ]);
+  if(ws!==workspace||historySelection.kind!=='task'||historySelection.id!==id||!el('home-messages'))return;
+  const task=trace.task||{},completed=task.status==='completed';
+  let resultMarkup='<div class="task-meta">当前状态：'+escape(task.status||'未知')+'</div>';
+  if(completed){
+   try{
+    const r=await api(root()+'/tasks/'+encodeURIComponent(id)+'/result');
+    if(ws!==workspace||historySelection.kind!=='task'||historySelection.id!==id)return;
+    resultMarkup+='<div class="task-meta">最终结果</div><div class="result-view">'+escape(r.presentation?.text??r.result??'已完成，但没有可显示的文本结果')+'</div>';
+   }catch(err){resultMarkup+='<div class="task-meta">无法读取最终结果：'+escape(err.message)+'</div>'}
+  }else{
+   resultMarkup+='<div class="task-meta">当前任务尚未产生已完成的最终结果。</div>';
+  }
+  const messages=(followups.messages||[]).map(m=>{
+   const mine=m.role==='user'&&m.author===uid;
+   return '<div class="home-message '+(mine?'user':'assistant')+'"><div class="speaker">'+
+    (mine?'你':m.role==='assistant'?'Biomni AI':'协作成员')+'</div>'+escape(m.body)+'</div>';
+  }).join('');
+  const html='<article class="home-task-focus"><h3>'+escape(task.title||id)+'</h3>'+
+   '<div class="task-meta">Task ID：'+escape(id)+'</div>'+resultMarkup+
+   '<div class="task-meta"><button type="button" data-task-dag="'+escape(id)+'">打开专业 DAG / 轨迹</button></div></article>'+
+   '<div class="home-task-followups"><div class="task-meta">当前任务的追加对话</div>'+messages+'</div>';
+  const nearBottom=target.scrollHeight-target.scrollTop-target.clientHeight<90;
+  if(target.innerHTML!==html){target.innerHTML=html;if(nearBottom)target.scrollTop=target.scrollHeight}
+  el('home-hero')?.classList.add('hidden');
+  target.querySelector('[data-task-dag]')?.addEventListener('click',()=>{selectedTask=id;navigate('tasks')});
+ }catch(err){if(ws===workspace&&historySelection.kind==='task'&&historySelection.id===id)
+   target.textContent='加载任务历史失败：'+err.message}
 }
 async function sendUnifiedTurn(e){
  e.preventDefault();if(homePending)return;
  const input=el('home-input'),message=input.value.trim(),mode=el('home-mode').value;
  if(!message)return;
- const destination=ws,session=chatSession,request_id=crypto.randomUUID();
+ const destination=ws,selection={...historySelection},session=selection.kind==='task'?taskFollowupSession(selection.id):chatSession,request_id=crypto.randomUUID();
  homePending=true;el('home-send').disabled=true;el('home-status').textContent='正在处理…';
  try{
   const result=await api(root()+'/assistant/turn',{message,mode,session,request_id},'POST');
-  if(destination!==ws||session!==chatSession)return;
+  if(destination!==ws||selection.kind!==historySelection.kind||selection.id!==historySelection.id)return;
   input.value='';
   el('home-status').textContent=result.route==='chat'?'已回复':`任务 ${result.task_route||'已创建'} · ${result.dispatch?.state||'等待执行'}`;
   await loadUnifiedChat();await refreshHistory(true);
- }catch(err){if(destination===ws&&session===chatSession)el('home-status').textContent=err.message}
+ }catch(err){if(destination===ws&&selection.kind===historySelection.kind&&selection.id===historySelection.id)el('home-status').textContent=err.message}
  finally{homePending=false;if(el('home-send'))el('home-send').disabled=false}
 }
 
@@ -482,7 +541,7 @@ async function saveModel(e){e.preventDefault();try{await api(root()+'/models/con
 async function testModel(){el('model-output').textContent='正在连接...';try{let d=await api(root()+'/models/probe',{},'POST');el('model-output').textContent=d.connected?'连接成功，发现 '+d.models_found+' 个模型':('连接失败：'+(d.error?.type||'unknown')+(d.error?.http_status?' (HTTP '+d.error.http_status+')':'')+'；'+(d.error?.message||'请检查服务器日志'))}catch(e){el('model-output').textContent=e.message}}
 async function invite(e){e.preventDefault();try{await api(root()+'/members',{email:el('member-email').value,password:el('member-password').value,role:el('member-role').value},'POST');toast('成员已添加');await reload()}catch(e){toast(e.message)}}
 function appendLog(ev){const t=el('log-stream');if(!t)return;const line=document.createElement('div');line.textContent=`[${new Date(ev.created*1000).toLocaleTimeString()}] ${ev.subject} [${ev.payload?.level}] ${ev.payload?.text}`;t.appendChild(line);if(t.childNodes.length>250)t.removeChild(t.firstChild);t.scrollTop=t.scrollHeight}
-el('sidebar-new-chat').onclick=()=>{chatSession='chat-'+crypto.randomUUID();navigate('home');refreshHistory(true).catch(()=>{})};
-el('login-form').onsubmit=login;el('nav').querySelectorAll('button').forEach(b=>b.onclick=()=>navigate(b.dataset.page));el('workspace').onchange=async()=>{ws=el('workspace').value;renderSidebarProjects();chatSession='main';lastEvent=0;selectedTask=null;taskTrace=null;graphData=null;dagResultCache.clear();dagResultPending.clear();dagResultMode.clear();topologyData=null;topologyFocus=null;historySessions=[];historyTasks=[];eventRows=[];eventNextBefore=null;await reload();await refreshHistory(true);connect()};el('logout').onclick=async()=>{try{await api('/api/v2/logout',{},'POST')}catch{}token=null;selectedTask=null;taskTrace=null;dagResultCache.clear();dagResultPending.clear();dagResultMode.clear();if(socket)socket.close();clearInterval(refreshTimer);el('shell').classList.add('hidden');el('login').classList.remove('hidden')};
+el('sidebar-new-chat').onclick=()=>{chatSession='chat-'+crypto.randomUUID();historySelection={kind:'session',id:chatSession};navigate('home');refreshHistory(true).catch(()=>{})};
+el('login-form').onsubmit=login;el('nav').querySelectorAll('button').forEach(b=>b.onclick=()=>navigate(b.dataset.page));el('workspace').onchange=async()=>{ws=el('workspace').value;renderSidebarProjects();chatSession='main';historySelection={kind:'session',id:'main'};lastEvent=0;selectedTask=null;taskTrace=null;graphData=null;dagResultCache.clear();dagResultPending.clear();dagResultMode.clear();topologyData=null;topologyFocus=null;historySessions=[];historyTasks=[];eventRows=[];eventNextBefore=null;await reload();await refreshHistory(true);connect()};el('logout').onclick=async()=>{try{await api('/api/v2/logout',{},'POST')}catch{}token=null;historySelection={kind:'session',id:'main'};selectedTask=null;taskTrace=null;dagResultCache.clear();dagResultPending.clear();dagResultMode.clear();if(socket)socket.close();clearInterval(refreshTimer);el('shell').classList.add('hidden');el('login').classList.remove('hidden')};
 })();
 </script></body></html>
