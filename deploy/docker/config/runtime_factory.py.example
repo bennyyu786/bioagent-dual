@@ -1,0 +1,8 @@
+"""Rename to runtime_factory.py after configuring real trusted providers.
+
+This file is deliberately NOT an automatic fake production runtime. Operator must
+implement create_runtime() and configure approved Task/Capability/Agent components.
+"""
+
+def create_runtime():
+    raise RuntimeError('Configure trusted, authenticated production runtime factory before starting')

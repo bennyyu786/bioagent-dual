@@ -1,0 +1,405 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Biomni Control Center · Team</title>
+<style>
+:root{color-scheme:dark;font-family:Inter,system-ui,-apple-system,'Segoe UI',sans-serif;background:#0b111b;color:#e2ecf6}*{box-sizing:border-box}body{margin:0}button,input,select,textarea{font:inherit}button{background:#1b3447;color:#dceffa;border:1px solid #355469;border-radius:9px;padding:9px 13px;cursor:pointer}button:hover{background:#28536c}button.primary{background:#0b8c7c;border-color:#24b9a7;color:#fff}button.danger{border-color:#a55466;color:#ffa9b6}input,select,textarea{background:#101d2d;border:1px solid #33485d;border-radius:9px;padding:11px;color:#eef6ff;width:100%}input:focus,textarea:focus{outline:2px solid #348f9a}.hidden{display:none!important}.login{max-width:450px;margin:13vh auto;background:#151e2d;padding:34px;border:1px solid #2c3d54;border-radius:20px;box-shadow:0 18px 70px #0005}.login h1{font-size:25px}.muted{color:#92a6bc;font-size:13px}.hint{color:#9eb6cc;font-size:12px}.login form{display:grid;gap:14px}.shell{display:grid;grid-template-columns:226px minmax(0,1fr);min-height:100vh}aside{background:#101a28;border-right:1px solid #25374c;padding:22px 14px}aside h1{font-size:17px;margin:0 10px 4px}aside .sub{font-size:11px;color:#7c93aa;margin:0 10px 30px}nav{display:grid;gap:5px}nav button{width:100%;text-align:left;background:transparent;border:0;padding:12px 14px;color:#a8c0d5}nav button.active{color:#fff;background:#1c3144}main{padding:26px;min-width:0}.top{display:flex;justify-content:space-between;gap:15px;align-items:center;margin-bottom:25px}.top h2{margin:0;font-size:25px}.topright{display:flex;align-items:center;gap:10px}#workspace{width:170px}.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin-bottom:18px}.card,.panel{border:1px solid #2b3d50;background:#141f2e;border-radius:15px;padding:18px}.card b{display:block;font-size:27px;margin-top:10px}.card span{font-size:12px;color:#91a9be}.layout{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(320px,1fr);gap:16px}.panel h3{font-size:15px;margin:0 0 16px}.item{padding:11px 0;border-top:1px solid #2a3a4c;display:flex;justify-content:space-between;gap:12px;align-items:center}.item:first-of-type{border-top:0}.item small{color:#89a0b7}.tag{display:inline-block;font-size:11px;border-radius:20px;background:#213a4b;color:#a9d6db;padding:4px 9px}#chat-list{height:min(48vh,520px);overflow:auto;margin:12px 0}.bubble{border-radius:12px;background:#1b3143;margin:8px 0;padding:12px;white-space:pre-wrap;word-break:break-word}.bubble.mine{background:#124a51;margin-left:9%}.bubble .who{font-size:11px;color:#a5bed4;margin-bottom:5px}.compose{display:flex;gap:8px}.compose textarea{min-height:82px;resize:vertical}.compose button{align-self:end}.scroll{max-height:65vh;overflow:auto}.logs{font:12px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre-wrap;word-break:break-word;background:#0a1320;padding:12px;border-radius:12px;min-height:150px;max-height:63vh;overflow:auto}.row{display:flex;gap:10px;margin-bottom:12px}.row>*{flex:1}.form{display:grid;gap:10px;max-width:650px}.notice{margin-top:18px;padding:10px 12px;background:#1d3441;border-radius:9px;font-size:12px;color:#b9d4e2}#toast{position:fixed;bottom:15px;right:15px;padding:13px 20px;background:#284d60;border:1px solid #4b8497;border-radius:12px;max-width:350px;display:none}a{color:#7acccc}@media(max-width:920px){.cards{grid-template-columns:repeat(2,1fr)}.layout{grid-template-columns:1fr}.shell{grid-template-columns:64px 1fr}aside{padding:15px 5px}aside h1{font-size:11px;margin:0 2px}aside .sub{display:none}nav button{font-size:0;padding:15px 10px}nav button::first-letter{font-size:19px}}@media(max-width:550px){main{padding:16px}.top{display:block}.topright{margin-top:12px}.cards{grid-template-columns:repeat(2,1fr)}.card{padding:12px}.row{display:block}.row>*{margin:5px 0}}
+
+/* v0.8.1 interactive DAG surface */
+.graphbar{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-bottom:12px}.graphbar input{width:180px;max-width:100%}.graphbar select{width:150px}.graphbar button{padding:8px 10px}
+.graphshell{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:12px;align-items:stretch}.dagviewport{background:radial-gradient(#344458 1px,transparent 1px) 0 0/24px 24px,#0a1523;border:1px solid #31465a;border-radius:12px;overflow:auto;min-height:430px;max-height:70vh;position:relative}.dagviewport svg{display:block;min-width:100%}.dagdetails{border:1px solid #34495c;background:#111e2c;border-radius:12px;padding:16px;overflow-wrap:anywhere;max-height:70vh;overflow-y:auto}.dagdetails h3{margin:0 0 10px}.dagdetails dl{font-size:13px;display:grid;grid-template-columns:85px 1fr;gap:9px}.dagdetails dt{color:#92a7bc}.dagdetails dd{margin:0}.dag-node{cursor:pointer;outline:none}.dag-node:focus .node-rect{stroke:#f5d58d;stroke-width:3}.dag-node:hover .node-rect{stroke:#79dbd3;stroke-width:3}.dag-edge{stroke:#47667e;stroke-width:2;fill:none}.dag-evt{border-left:2px solid #39798b;padding:6px 10px;margin:8px 0;font-size:12px}.graphhint{color:#9bb2c7;font-size:12px;margin-top:8px}.related{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}.related button{font-size:12px}.graph-info{padding:10px;border:1px solid #5b4d33;border-radius:8px;background:#29251e;color:#f3ce8d;font-size:12px}
+@media(max-width:1120px){.graphshell{grid-template-columns:1fr}.dagdetails{max-height:none}}
+
+.topolayout{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:12px}.topoview{background:radial-gradient(#274054 1px,transparent 1px) 0 0/24px 24px,#091623;overflow:auto;max-height:69vh;min-height:440px;border:1px solid #344c62;border-radius:12px}.topoview svg{display:block}.toponode{cursor:pointer;outline:none}.toponode:hover rect,.toponode:focus rect{stroke:#79e0d4;stroke-width:3}.topodetail{padding:14px;background:#111f2c;border:1px solid #3b5367;border-radius:12px;overflow-wrap:anywhere}.topolegend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:#9db6c9;margin:6px 0}.toposwatch{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:4px}.topotitle{font-size:13px;color:#d5e9f6;margin-bottom:8px}.topocounts{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.topocounts span{background:#21394b;padding:7px 10px;border-radius:8px;font-size:12px;color:#c5e0ee}@media(max-width:1000px){.topolayout{grid-template-columns:1fr}}
+
+/* v0.8.3 runtime relations, reservation and quota visualization */
+.resourcepanels{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}.resourcepanels>section{background:#101d2b;border:1px solid #30485c;border-radius:12px;padding:16px}.runtimecontrols{margin-top:14px;border:1px solid #30485c;padding:12px;border-radius:10px}.runtimecontrols summary{cursor:pointer;color:#b6dbe2}.resourcepanels h3{font-size:14px;margin:0 0 12px}.resourcegrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:10px}.resourcecard{background:#1c3142;border-radius:10px;padding:11px}.resourcecard b{font-size:13px}.resourcecard progress{display:block;width:100%;height:9px;accent-color:#49c6b8;margin:5px 0 10px}.resrow{display:flex;justify-content:space-between;gap:8px;font-size:11px;color:#bbd1e1;margin-top:8px}.resitem{padding:9px 0;border-bottom:1px solid #294055;color:#d6e6ef;font-size:12px;overflow-wrap:anywhere}@media(max-width:990px){.resourcepanels{grid-template-columns:1fr}}
+.reviewcard{border:1px solid #355063;background:#101d2d;border-radius:11px;padding:15px;margin:10px 0}.reviewhead,.reviewactions{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.reviewactions{justify-content:flex-start;margin-top:12px}.reviewresult{white-space:pre-wrap;overflow-wrap:anywhere;max-height:430px;overflow:auto;background:#071422;border:1px solid #385066;padding:17px;border-radius:10px;color:#ddeffc;font-size:13px}.reviewcard .hint{overflow-wrap:anywhere;margin-top:8px}#acceptance-policy-form input[type=checkbox],#review-decision-form input[type=checkbox]{width:auto;margin-right:8px}.result-view{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;font-size:14px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere;max-height:650px}.result-tabs{display:flex;gap:8px;margin:10px 0}.result-tabs button[aria-pressed=true]{background:#17675e;border-color:#36b6a3}
+/* v0.9.1 unified conversation homepage: professional views are opt-in. */
+.homenav{font-weight:700!important;color:#e5f6ff!important;background:#1b3145!important}
+.proviews{margin-top:14px;border-top:1px solid #2b3e50;padding-top:13px}
+.proviews>summary{cursor:pointer;color:#96aec3;padding:10px 13px;font-size:13px;list-style:none}
+.proviews>summary:before{content:'▸ ';color:#7fabc3}.proviews[open]>summary:before{content:'▾ '}
+.homepage{width:min(100%,900px);margin:0 auto;min-height:calc(100vh - 145px);display:flex;flex-direction:column;gap:16px}
+.homehero{text-align:center;margin:auto 0 5px;padding:40px 10px 10px}.homehero h1{font-size:clamp(26px,4vw,38px);letter-spacing:-1px;font-weight:600;margin:0 0 12px}.homehero p{color:#99b3c9}
+.homehead{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 0}.homehead button{font-size:12px}
+.homemessages{flex:1;min-height:140px;max-height:calc(100vh - 310px);overflow-y:auto;display:flex;flex-direction:column;gap:18px;scrollbar-width:thin}
+.home-message{max-width:88%;white-space:pre-wrap;line-height:1.75;overflow-wrap:anywhere;padding:12px 17px;border-radius:19px;font-size:15px}
+.home-message.user{align-self:flex-end;background:#233b4f}.home-message.assistant{align-self:flex-start;background:transparent;padding-left:6px}
+.home-message .speaker{font-size:11px;color:#94b6ca;margin-bottom:6px}
+.home-task{border:1px solid #35526a;background:#142b3c;border-radius:14px;padding:13px;margin:8px 0;white-space:normal}
+.home-task button{margin-top:9px;font-size:12px}.home-task-result{white-space:pre-wrap;line-height:1.65;max-height:420px;overflow:auto;margin-top:10px}
+.homecomposer{position:sticky;bottom:10px;background:#152437;border:1px solid #38516b;border-radius:25px;padding:13px 15px;box-shadow:0 8px 38px #0004}
+.homecomposer textarea{border:0;outline:0;background:transparent;resize:none;min-height:56px;max-height:190px;padding:9px;width:100%;font-size:16px;line-height:1.5}
+.homecomposer textarea:focus{outline:0}.homeactions{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.homeactions select{width:auto;max-width:170px;border-radius:24px;padding:8px 11px;font-size:12px}
+.homeactions button{border-radius:30px}.homeactions .send{width:42px;height:42px;padding:5px;font-size:20px;background:#e4eff7;color:#102137;border:0}
+.homestatus{min-height:18px;color:#a6c4d6;font-size:12px}
+@media(max-width:650px){.homepage{min-height:calc(100vh - 180px)}.home-message{max-width:96%}.homehero{padding:20px 0}.homemessages{max-height:calc(100vh - 340px)}}
+
+/* Reference-inspired conversation canvas. These overrides apply only to the homepage. */
+body.unified-home{background:#f8f9fb;color:#202630;color-scheme:light}
+body.unified-home .shell{background:#f8f9fb}
+body.unified-home aside{background:#f5f6f8;border-right:1px solid #e4e7eb;color:#283343}
+body.unified-home aside h1,body.unified-home .homenav{color:#233044!important}
+body.unified-home aside .sub,body.unified-home .muted{color:#7d8896}
+body.unified-home nav button{color:#536579}
+body.unified-home nav button.active{color:#172d47!important;background:#e9edf3!important}
+body.unified-home .proviews{border-top-color:#e4e7eb}
+body.unified-home .proviews>summary{color:#627287}
+body.unified-home aside .notice{background:#fff;color:#687485;border:1px solid #e2e7ed}
+body.unified-home main{background:#fff}
+body.unified-home main>.top{border-bottom:1px solid #f0f2f5;margin-bottom:10px;padding-bottom:12px}
+body.unified-home .top h2{font-size:17px;color:#2c3442}
+body.unified-home .topright select,body.unified-home .topright button,body.unified-home .homehead button{background:#fff;color:#4d5868;border:1px solid #e4e8ed}
+body.unified-home .topright .tag{background:#ecf8f2;color:#34745a;border-color:#cce8d9}
+body.unified-home .homepage{width:min(100%,930px);min-height:calc(100dvh - 125px);gap:12px}
+body.unified-home .homehead{padding:8px 0;color:#86909e}
+body.unified-home .homehero{margin:auto 0 14px;padding:50px 10px 15px}
+body.unified-home .homehero h1{color:#273242;font-size:clamp(27px,3.6vw,37px);font-weight:550}
+body.unified-home .homehero p{color:#8993a2}
+body.unified-home .homemessages{max-height:calc(100dvh - 280px);color:#293344}
+body.unified-home .home-message.user{background:#f1f3f6;color:#293344}
+body.unified-home .home-message.assistant{background:transparent;color:#293344}
+body.unified-home .home-message .speaker{color:#8a96a4}
+body.unified-home .home-task{background:#f7f9fc;border:1px solid #e0e7ee;color:#36475a}
+body.unified-home .home-task button{background:white;color:#37506e;border-color:#dce4ee}
+body.unified-home .homecomposer{background:#fff;border:1px solid #e4e7eb;border-radius:34px;padding:9px 16px;box-shadow:0 4px 28px #1c273312;bottom:12px}
+body.unified-home .homecomposer textarea{background:transparent;color:#222b38;font-size:17px;min-height:54px;max-height:170px;padding:12px 9px;border:0}
+body.unified-home .homecomposer textarea::placeholder{color:#9b9fa7}
+body.unified-home .homeactions select{background:#f6f7f9;border:0;color:#6a7380}
+body.unified-home .home-tools{display:flex;align-items:center;gap:9px}
+body.unified-home .homeplus,body.unified-home .homemic{background:transparent;color:#293442;border:0;padding:4px 9px;font-size:25px;line-height:1.2}
+body.unified-home .homeplus:hover,body.unified-home .homemic:hover{background:#f2f4f7;border-radius:50%}
+body.unified-home .homeactions .send{background:#2864c6;color:#fff;border-radius:50%}
+body.unified-home .homeactions .send:disabled{opacity:.4}
+body.unified-home .homestatus{color:#89919e;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:750px){body.unified-home .shell{grid-template-columns:minmax(0,1fr)}body.unified-home aside{padding:10px 14px;border-right:0;border-bottom:1px solid #e3e7ed}body.unified-home aside h1{display:inline;font-size:15px}body.unified-home aside .sub,body.unified-home aside .notice{display:none}body.unified-home aside nav{display:inline-flex;margin-left:18px}body.unified-home .proviews{display:none}body.unified-home main{padding:12px}body.unified-home .top{flex-wrap:wrap}body.unified-home .homepage{min-height:calc(100dvh - 210px)}body.unified-home .homemessages{max-height:calc(100dvh - 330px)}body.unified-home .homestatus{max-width:100px}}
+
+/* v0.9.2 universal white canvas with black typography, including professional views. */
+:root,body{color-scheme:light!important;background:#fff!important;color:#171717!important}
+body,.shell,main{background:#fff!important;color:#171717!important}
+aside{background:#f8f8f8!important;border-right:1px solid #e6e6e6!important;color:#151515!important}
+aside h1,aside .sub,aside nav button,aside .homenav,.proviews>summary{color:#151515!important}
+nav button.active,.homenav,body.unified-home .homenav{background:#ebebeb!important;color:#101010!important}
+button,select,input,textarea{background:#fff!important;color:#181818!important;border-color:#d7d7d7!important}
+button:hover{background:#efefef!important}button.primary,.homeactions .send{background:#1d1d1d!important;color:#fff!important;border-color:#1d1d1d!important}
+.card,.panel,.resourcepanels>section,.resourcecard,.reviewcard,.topodetail,.home-task,.topocounts span,.notice,.reviewresult,.result-view,.logs,.graph-info,.topology-detail{background:#fff!important;color:#171717!important;border-color:#dedede!important}
+.topoview,.graphview{background:radial-gradient(#dddddd 1px,transparent 1px) 0 0/24px 24px,#fff!important;color:#111!important}
+.muted,.hint,.tag,.card span,.topolegend,.topotitle,.resrow,.resitem,.dagdetails dt,.item small,.top .muted,.notice,.homestatus{color:#565656!important}
+.tag{background:#f0f0f0!important;border-color:#ddd!important;color:#272727!important}
+.bubble,.bubble.mine,.home-message.user{background:#f1f1f1!important;color:#141414!important}
+.home-message.assistant{background:#fff!important;color:#171717!important}
+.logs{white-space:pre-wrap;font:12px/1.65 ui-monospace,SFMono-Regular,Consolas,monospace;min-height:240px}
+#toast{background:#fff!important;color:#171717!important;border-color:#bbb!important;box-shadow:0 5px 22px #0002}
+body.unified-home,body.unified-home .shell,body.unified-home aside,body.unified-home main{background:#fff!important;color:#111!important}
+body.unified-home aside{background:#f8f8f8!important}
+body.unified-home .homehero h1,body.unified-home .homehero p,body.unified-home .home-message,body.unified-home .homehead,body.unified-home .top h2{color:#191919!important}
+body.unified-home .homecomposer{background:#fff!important;border:1px solid #ddd!important;box-shadow:0 3px 22px #0001}
+body.unified-home .homeactions .send{background:#191919!important;color:#fff!important}
+.history-index{margin:18px 0 5px;border-top:1px solid #e7e7e7;padding-top:13px;max-height:48vh;overflow:auto}
+.history-index h3{font-size:13px;color:#777;margin:8px 8px 6px;font-weight:600}
+.history-index .history-entry{display:block;width:100%;text-align:left;background:transparent!important;border:0!important;border-radius:12px;padding:9px 10px;color:#222!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}
+.history-index .history-entry:hover,.history-index .history-entry.selected{background:#e9e9e9!important}
+.history-index .history-entry small{display:block;font-size:11px;color:#666;overflow:hidden;text-overflow:ellipsis}
+.history-more{font-size:11px!important;width:100%;margin:4px 0 12px!important;border:0!important;color:#555!important;background:transparent!important}
+.log-controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:12px 0}
+.log-controls select{max-width:220px}.logrow{display:grid;grid-template-columns:100px 145px minmax(0,1fr);gap:10px;align-items:start;padding:7px 4px;border-bottom:1px solid #eee;overflow-wrap:anywhere}
+.logrow .event-kind{font-weight:600}.logrow time{color:#666}.logrow pre{white-space:pre-wrap;font:inherit;margin:0;color:#444}
+.logrow button{font-size:11px;padding:3px 6px}.log-more{margin-top:10px}
+@media(max-width:900px){.history-index{max-height:30vh}.logrow{grid-template-columns:70px minmax(0,1fr)}.logrow pre{grid-column:2}}
+
+
+/* Professional DAG topology light contrast, including SVG inline fills. */
+.graphview svg text,.topoview svg text,.graphshell svg text{fill:#111!important}
+.graphview svg .node-rect,.graphshell svg .node-rect,.topoview svg rect{fill:#fff!important;stroke:#9a9a9a!important}
+.graphview svg path,.topoview svg path{stroke:#777!important}
+
+</style></head><body>
+<div id="login" class="login"><div style="font-size:30px">◈</div><h1>Biomni Control Center</h1><p class="muted">Team workspace · 多用户协作控制台</p><form id="login-form"><label>账户邮箱<input id="email" autocomplete="username" required placeholder="operator@example.com"></label><label>密码<input id="password" type="password" autocomplete="current-password" required></label><button class="primary">安全登录</button></form><p class="hint">需要由管理员通过本机 CLI 初始化账户。访问地址必须由 TLS 反向代理保护。</p></div>
+<div id="shell" class="shell hidden"><aside><h1>◈ BIOMNI</h1><div class="sub">CONTROL CENTER / TEAM · 0.9.2</div><nav id="nav"><button data-page="home" class="active homenav">◉　Biomni AI</button><details class="proviews" id="professional-views"><summary>专业视图 / 管理</summary><button data-page="overview">◫　运行总览</button><button data-page="tasks">◇　Task Center / DAG</button><button data-page="topology">◎　Capability Center / 拓扑</button><button data-page="workers">▣　Worker 中心</button><button data-page="logs">≡　实时日志</button><button data-page="models">✧　模型连接</button><button data-page="members">♙　团队权限</button></details></nav><section id="history-index" class="history-index" aria-label="历史会话与任务"></section><div class="notice" style="margin-top:30px">安全控制<br><span class="hint">操作按工作区权限校验，任务提交需要明确确认。</span></div></aside><main><header class="top"><div><h2 id="title">运行总览</h2><div class="muted" id="email-label"></div></div><div class="topright"><span id="socket-state" class="tag">连接中</span><select id="workspace"></select><button id="logout">退出</button></div></header><div id="page"></div></main></div><div id="toast" role="status"></div>
+<script>
+(() => {'use strict';let acceptanceQueue=null,acceptancePolicy=null;const dagResultCache=new Map(),dagResultPending=new Set(),dagResultMode=new Map();let token=null,uid='',ws='',page='home',data={},socket=null,lastEvent=0,refreshTimer=null,graphData=null,selectedTask=null,taskTrace=null,graphSearch='',graphFilter='all',graphZoom=1,topologyData=null,topologyFocus=null,topologySearch='',topologyZoom=1,chatSession='main';
+const el=id=>document.getElementById(id);const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const toast=msg=>{el('toast').textContent=msg;el('toast').style.display='block';setTimeout(()=>el('toast').style.display='none',4200)};
+async function api(path,body,method='GET'){const opts={method,headers:{Authorization:'Bearer '+token}};if(body!==undefined){opts.headers['Content-Type']='application/json';opts.body=JSON.stringify(body)}const r=await fetch(path,opts);let d;try{d=await r.json()}catch{d={}}if(!r.ok)throw Error(d.detail||`HTTP ${r.status}`);return d}
+const root=()=>'/api/v2/'+encodeURIComponent(ws);
+async function login(e){e.preventDefault();try{const d=await apiPublic('/api/v2/login',{email:el('email').value,password:el('password').value});token=d.token;uid=d.user_id;el('password').value='';await start()}catch(err){toast(err.message)}}
+async function apiPublic(p,b){const r=await fetch(p,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});const d=await r.json();if(!r.ok)throw Error(d.detail||'Login failed');return d}
+async function start(){dagResultCache.clear();dagResultPending.clear();dagResultMode.clear();const m=await api('/api/v2/me');el('email-label').textContent=m.email;el('workspace').innerHTML=m.workspaces.map(w=>`<option value="${escape(w.id)}">${escape(w.title)} · ${escape(w.role)}</option>`).join('');if(!m.workspaces.length)throw Error('No workspaces');ws=m.workspaces[0].id;el('login').classList.add('hidden');el('shell').classList.remove('hidden');await reload();await refreshHistory(true);try{const latest=await api(root()+'/events/history?limit=1');if(latest.events?.length)lastEvent=latest.events[0].id}catch{}connect();refreshTimer=setInterval(reload,10000)}
+async function reload(){try{const currentWorkspace=ws;data=await api(root()+'/overview');if(page==='topology'){topologyData=await api(root()+'/topology');topologyData.runtime=await api(root()+'/runtime/resources');}if(page==='reviews'){const [q,p]=await Promise.all([api(root()+'/acceptance/queue'),api(root()+'/acceptance/policy')]);acceptanceQueue=q;acceptancePolicy=p;}if(page==='tasks'){graphData=await api(root()+'/graph');if(selectedTask && graphData.nodes.some(n=>n.id===selectedTask)){taskTrace=await api(root()+'/tasks/'+encodeURIComponent(selectedTask)+'/trace')}else{selectedTask=null;taskTrace=null}}if(ws===currentWorkspace){if((page==='reviews'&&el('review-decision-form')))return;if(page==='home'&&el('home-messages'))await loadUnifiedChat();else render()}}catch(e){toast(e.message)}}
+function connect(){if(socket){socket.close();socket=null}el('socket-state').textContent='连接中';api(root()+'/tickets',{},'POST').then(d=>{const wsForSocket=ws;const scheme=location.protocol==='https:'?'wss:':'ws:';socket=new WebSocket(`${scheme}//${location.host}/ws/${encodeURIComponent(ws)}?ticket=${encodeURIComponent(d.ticket)}&after=${lastEvent}`);const thisSocket=socket;socket.onopen=()=>{if(socket===thisSocket)el('socket-state').textContent='实时连接'};socket.onmessage=e=>{if(socket!==thisSocket)return;let evt=JSON.parse(e.data);lastEvent=Math.max(lastEvent,evt.id);onRealtimeEvent(evt)};socket.onclose=()=>{if(socket!==thisSocket)return;el('socket-state').textContent='轮询模式';if(token&&ws===wsForSocket)setTimeout(()=>{if(token&&ws===wsForSocket&&socket?.readyState!==WebSocket.OPEN)connect()},3000)};socket.onerror=()=>{if(socket===thisSocket)el('socket-state').textContent='连接异常'}}).catch(e=>toast(e.message))}
+const fmt=(s)=>escape(s).replace(/\n/g,'<br>');function line(label,meta='',right=''){return `<div class="item"><div><div>${escape(label)}</div><small>${escape(meta)}</small></div><span class="tag">${escape(right)}</span></div>`}
+function render(){document.body.classList.toggle('unified-home',page==='home');const d=data;el('title').textContent=({home:'Biomni AI',overview:'运行总览',tasks:'任务 DAG',topology:'双中心执行拓扑',chat:'Biomni AI',workers:'远程 Worker',reviews:'结果审核',logs:'实时日志',models:'模型连接',members:'成员与权限'})[page];const root=el('page');if(page==='home'){renderHome(root)}
+else if(page==='overview'){root.innerHTML=`<section class="cards"><div class="card"><span>任务总数</span><b>${d.tasks?.length||0}</b></div><div class="card"><span>在线 Worker</span><b>${(d.workers||[]).filter(x=>x.state==='online').length}</b></div><div class="card"><span>事件数量</span><b>${d.recent_events?.length||0}</b></div><div class="card"><span>模型连接</span><b>${d.model?.configured?'就绪':'未配置'}</b></div></section><section class="layout"><div class="panel"><h3>任务</h3>${(d.tasks||[]).slice(0,15).map(t=>line(t.prompt,'ID '+t.id,t.status)).join('')||'<p class="muted">暂无任务</p>'}</div><div class="panel"><h3>事件流</h3>${(d.recent_events||[]).slice(-20).reverse().map(e=>line(e.kind,e.subject,'#'+e.id)).join('')||'<p class="muted">暂无事件</p>'}</div></section>`}
+else if(page==='tasks'){renderGraph(root)}
+else if(page==='topology'){renderTopology(root)}
+else if(page==='workers'){root.innerHTML=`<div class="layout"><section class="panel"><h3>远程 Worker</h3>${(d.workers||[]).map(w=>`<div class="item"><div>${escape(w.id)} <span class="tag">${escape(w.state)}</span><div class="hint">心跳间隔 ${escape(w.age_seconds??'无')} 秒</div></div><div style="display:flex;gap:6px"><button data-w="${escape(w.id)}" data-a="drain">排空</button><button data-w="${escape(w.id)}" data-a="resume">恢复</button></div></div>`).join('')||'<p class="muted">暂无已注册 Worker</p>'}</section><section class="panel"><h3>注册 Worker（管理员）</h3><form id="worker-form" class="form"><input id="worker-id" placeholder="worker-id" required><button>生成 Worker 密钥</button></form><div id="worker-secret" class="notice">密钥只显示一次，请妥善保存。</div><p class="hint">控制命令由 Worker 主动领取和确认；中心不会在状态不明时自动重发。</p></section></div>`;el('worker-form').onsubmit=registerWorker;root.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>command(b.dataset.w,b.dataset.a))}
+else if(page==='reviews'){renderReviews(root)}
+else if(page==='logs'){renderLogs(root)}
+else if(page==='models'){root.innerHTML=`<div class="layout"><section class="panel"><h3>模型提供商配置（管理员）</h3><p class="muted">连接到 OpenAI 兼容 API。密钥只在服务器环境变量中配置。</p><form id="model-form" class="form"><input id="model-url" placeholder="https://your-provider/v1" value="${escape(d.model?.base_url||'')}" required><input id="model-name" placeholder="model-id" value="${escape(d.model?.model||'')}" required><button>保存连接配置</button></form><button style="margin-top:12px" id="model-test">测试模型发现</button><div id="model-output" class="notice">尚未测试</div></section><section class="panel"><h3>连接状态</h3>${line(d.model?.model||'未配置模型',d.model?.base_url||'','MODEL')}<div class="notice">模型响应不会自动调用 Worker，工具和生产权限仅由控制平面授予。</div></section></div>`;el('model-form').onsubmit=saveModel;el('model-test').onclick=testModel}
+else if(page==='members'){root.innerHTML=`<div class="layout"><section class="panel"><h3>成员</h3><div id="member-list">正在加载...</div></section><section class="panel"><h3>邀请团队成员（管理员）</h3><form id="member-form" class="form"><input id="member-email" placeholder="user@example.com" required><input id="member-password" type="password" placeholder="初始强密码（12 字符以上）" required><select id="member-role"><option value="viewer">viewer · 只读</option><option value="operator">operator · 操作</option><option value="admin">admin · 管理员</option></select><button>添加成员</button></form></section></div>`;el('member-form').onsubmit=invite;api(rootPath()+'/members').then(r=>el('member-list').innerHTML=r.map(m=>line(m.email,m.id,m.role)).join('')).catch(e=>el('member-list').textContent=e.message)} }
+
+
+// Unified conversation frontend: no HTML from model output, and task results are
+// rendered only when server-side task state is completed.
+let homePending=false;
+
+// Durable workspace history and event log are paginated; UI never deletes records.
+let historySessions=[],historyTasks=[],historyNextSession=null,historyNextTask=null;
+let eventRows=[],eventNextBefore=null,logFilter='all',logBusy=false;
+async function refreshHistory(reset=true){
+ if(reset){historySessions=[];historyTasks=[]}
+ const wsAtRequest=ws;
+ const [sessions,tasksHistory]=await Promise.all([
+  api(root()+'/assistant/history?kind=sessions&limit=80&offset='+(reset?0:historySessions.length)),
+  api(root()+'/assistant/history?kind=tasks&limit=80&offset='+(reset?0:historyTasks.length))]);
+ if(ws!==wsAtRequest)return;
+ historySessions=historySessions.concat(sessions.items);historyTasks=historyTasks.concat(tasksHistory.items);
+ historyNextSession=sessions.next_offset;historyNextTask=tasksHistory.next_offset;
+ renderHistory();
+}
+function renderHistory(){
+ const target=el('history-index');if(!target)return;
+ target.innerHTML='<h3>最近 · 历史会话</h3>'+
+  (historySessions.map(x=>`<button class="history-entry ${chatSession===x.id?'selected':''}" data-session-id="${escape(x.id)}" title="${escape(x.preview)}">${escape(x.preview||'新对话')}<small>${escape(x.id)} · ${x.count} 条消息</small></button>`).join('')||'<p class="hint">暂无会话</p>')+
+  (historyNextSession!==null?'<button class="history-more" id="more-sessions">加载更早的会话</button>':'')+
+  '<h3>提交的任务</h3>'+
+  (historyTasks.map(x=>`<button class="history-entry" data-history-task="${escape(x.id)}" title="${escape(x.title)}">${escape(x.title)}<small>${escape(x.status)} · ${escape(x.id.slice(0,12))}</small></button>`).join('')||'<p class="hint">暂无任务</p>')+
+  (historyNextTask!==null?'<button class="history-more" id="more-tasks">加载更早的任务</button>':'');
+ target.querySelectorAll('[data-session-id]').forEach(btn=>btn.onclick=()=>{chatSession=btn.dataset.sessionId;navigate('home')});
+ target.querySelectorAll('[data-history-task]').forEach(btn=>btn.onclick=()=>{selectedTask=btn.dataset.historyTask;navigate('tasks')});
+ if(el('more-sessions'))el('more-sessions').onclick=async()=>{
+  const r=await api(root()+'/assistant/history?kind=sessions&limit=80&offset='+historySessions.length);
+  historySessions.push(...r.items);historyNextSession=r.next_offset;renderHistory();
+ };
+ if(el('more-tasks'))el('more-tasks').onclick=async()=>{
+  const r=await api(root()+'/assistant/history?kind=tasks&limit=80&offset='+historyTasks.length);
+  historyTasks.push(...r.items);historyNextTask=r.next_offset;renderHistory();
+ };
+}
+function eventMatches(e){return logFilter==='all'||(logFilter==='worker'?e.kind==='worker_log':logFilter==='task'?/^(task_|dispatch_|planning_|runtime_)/.test(e.kind):e.kind!=='worker_log')}
+async function loadEvents(reset=true){
+ if(logBusy)return;logBusy=true;
+ try{const wsAtRequest=ws;const url=root()+'/events/history?limit=100'+(!reset&&eventNextBefore?'&before='+eventNextBefore:'');
+  const d=await api(url);if(wsAtRequest!==ws)return;
+  eventRows=reset?d.events:eventRows.concat(d.events.filter(e=>!eventRows.some(x=>x.id===e.id)));
+  eventRows.sort((a,b)=>b.id-a.id);eventNextBefore=d.next_before;renderEventRows();
+ }catch(err){const status=el('log-status');if(status)status.textContent=err.message}finally{logBusy=false}
+}
+function renderLogs(target){
+ target.innerHTML=`<section class="panel"><h3>WebSocket 实时事件与日志</h3>
+  <p class="muted">展示工作区的任务、调度及 Worker 事件。历史事件保存在数据库中，断线后可重新加载。</p>
+  <div class="log-controls"><select id="log-filter" aria-label="日志筛选"><option value="all">全部事件</option><option value="task">任务 / 调度</option><option value="worker">Worker 日志</option><option value="other">其他事件</option></select><button id="logs-refresh">刷新</button><span class="hint" id="log-status"></span></div>
+  <div id="log-stream" class="logs" aria-live="polite"></div><button id="log-more" class="log-more">加载更早的记录</button></section>`;
+ el('log-filter').value=logFilter;el('log-filter').onchange=e=>{logFilter=e.target.value;renderEventRows()};
+ el('logs-refresh').onclick=()=>loadEvents(true);
+ el('log-more').onclick=()=>loadEvents(false);
+ renderEventRows();if(!eventRows.length)loadEvents(true);
+}
+function renderEventRows(){const box=el('log-stream');if(!box)return;
+ const events=eventRows.filter(eventMatches);
+ box.innerHTML=events.map(e=>`<div class="logrow"><time>${new Date(e.created*1000).toLocaleString()}</time><span class="event-kind">${escape(e.kind)} #${e.id}</span><pre>${escape(e.subject)}${e.payload?.text?' · '+escape(e.payload.text):''}${e.payload?.level?' ['+escape(e.payload.level)+']':''}</pre></div>`).join('')||'<div class="muted">当前筛选没有匹配事件，试试“全部事件”。</div>';
+ if(el('log-more'))el('log-more').disabled=eventNextBefore===null;
+ if(el('log-status'))el('log-status').textContent='共载入 '+eventRows.length+' 条事件';
+}
+function onRealtimeEvent(evt){
+ if(!eventRows.some(e=>e.id===evt.id)){eventRows.unshift(evt);eventRows.sort((a,b)=>b.id-a.id)}
+ if(page==='logs'){renderEventRows()}else reload();
+ if(evt.kind==='chat_message'||evt.kind==='task_submitted')refreshHistory(true).catch(()=>{});
+}
+
+function renderHome(target){
+ target.innerHTML=`<section class="homepage" aria-label="Biomni AI 对话首页"><div class="homehead"><span class="muted">工作区对话 · ${escape(ws)}</span><button id="new-conversation" type="button">＋ 新对话</button></div><div class="homehero" id="home-hero"><h1>有什么可以帮你？</h1><p>可以先提问，也可以描述需要完成的任务。</p></div><div id="home-messages" class="homemessages" aria-live="polite"></div><form id="home-form" class="homecomposer"><textarea id="home-input" rows="2" maxlength="4000" required placeholder="询问 Biomni，或描述你的任务…" aria-label="输入消息"></textarea><div class="homeactions"><div class="home-tools"><button type="button" class="homeplus" id="home-plus" aria-label="展开专业视图" title="展开专业视图">＋</button><select id="home-mode" aria-label="对话模式"><option value="auto">智能判断</option><option value="chat">仅对话</option><option value="task">执行任务</option></select></div><div class="home-tools"><span id="home-status" class="homestatus" role="status"></span><button type="button" id="home-mic" class="homemic" title="语音输入（支持的浏览器）" aria-label="语音输入">♩</button><button class="send" id="home-send" title="发送" aria-label="发送消息">↑</button></div></div></form></section>`;
+ el('home-form').onsubmit=sendUnifiedTurn;
+ el('home-input').onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();el('home-form').requestSubmit()}};
+ el('new-conversation').onclick=()=>{chatSession='chat-'+crypto.randomUUID();loadUnifiedChat();renderHistory()};
+ el('home-plus').onclick=()=>{const p=el('professional-views');p.open=!p.open;if(p.open)toast('可从左侧导航打开 DAG、能力和 Worker 专业视图')};
+ const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!SpeechRecognition){el('home-mic').classList.add('hidden')}
+ else el('home-mic').onclick=()=>{
+  const recognition=new SpeechRecognition();recognition.lang='zh-CN';recognition.interimResults=false;
+  el('home-mic').disabled=true;el('home-status').textContent='正在聆听…';
+  recognition.onresult=e=>{const text=e.results?.[0]?.[0]?.transcript||'';if(text){el('home-input').value=(el('home-input').value+' '+text).trim();el('home-input').focus()}};
+  recognition.onerror=()=>{if(el('home-status'))el('home-status').textContent='语音输入不可用，请改用键盘'};
+  recognition.onend=()=>{if(el('home-mic'))el('home-mic').disabled=false};
+  try{recognition.start()}catch{el('home-mic').disabled=false}
+ };
+ loadUnifiedChat();
+}
+async function loadUnifiedChat(){
+ const target=el('home-messages');if(!target)return;
+ try{
+  const session=chatSession, d=await api(root()+'/assistant/session/'+encodeURIComponent(session));
+  if(session!==chatSession||!el('home-messages'))return;
+  const html=d.messages.map(m=>{
+   const mine=m.role==='user'&&m.author===uid;const linked=d.tasks?.[m.id];
+   let task='';
+   if(linked){
+    const result=linked.status==='completed'&&linked.result?`<div class="home-task-result">${escape(linked.result)}</div>`:'';
+    task=`<div class="home-task"><span class="tag">任务 · ${escape(linked.status)}</span>${result}<div><button type="button" data-open-task="${escape(linked.id)}">查看任务 DAG / 轨迹</button></div></div>`;
+   }
+   return `<div class="home-message ${mine?'user':'assistant'}"><div class="speaker">${mine?'你':m.role==='assistant'?'Biomni AI':'协作成员 · '+escape(m.author.slice(0,8))}</div>${escape(m.body)}${task}</div>`;
+  }).join('');
+  if(target.innerHTML!==html){const nearBottom=target.scrollHeight-target.scrollTop-target.clientHeight<90;target.innerHTML=html;if(nearBottom)target.scrollTop=target.scrollHeight;}
+  el('home-hero')?.classList.toggle('hidden',d.messages.length>0);
+  target.querySelectorAll('[data-open-task]').forEach(b=>b.onclick=()=>{selectedTask=b.dataset.openTask;navigate('tasks')});
+ }catch(err){if(el('home-status'))el('home-status').textContent=err.message}
+}
+async function sendUnifiedTurn(e){
+ e.preventDefault();if(homePending)return;
+ const input=el('home-input'),message=input.value.trim(),mode=el('home-mode').value;
+ if(!message)return;
+ const destination=ws,session=chatSession,request_id=crypto.randomUUID();
+ homePending=true;el('home-send').disabled=true;el('home-status').textContent='正在处理…';
+ try{
+  const result=await api(root()+'/assistant/turn',{message,mode,session,request_id},'POST');
+  if(destination!==ws||session!==chatSession)return;
+  input.value='';
+  el('home-status').textContent=result.route==='chat'?'已回复':`任务 ${result.task_route||'已创建'} · ${result.dispatch?.state||'等待执行'}`;
+  await loadUnifiedChat();await refreshHistory(true);
+ }catch(err){if(destination===ws&&session===chatSession)el('home-status').textContent=err.message}
+ finally{homePending=false;if(el('home-send'))el('home-send').disabled=false}
+}
+
+function graphNodes(){return (graphData?.nodes||[]).filter(n=>(graphFilter==='all'||n.status===graphFilter)&&(!graphSearch||(n.title+' '+n.id).toLowerCase().includes(graphSearch.toLowerCase())))}
+function graphPosition(nodes){const groups=new Map();for(const node of nodes){const a=groups.get(node.rank)||[];a.push(node);groups.set(node.rank,a)}const pos={};for(const [rank,group] of [...groups].sort((a,b)=>a[0]-b[0])){group.forEach((n,i)=>{pos[n.id]={x:24+rank*260,y:26+i*108}})}return pos}
+function renderGraph(target){
+const nodes=graphNodes(),pos=graphPosition(nodes),maxRank=Math.max(0,...nodes.map(n=>n.rank)),maxRows=Math.max(1,...[...new Set(nodes.map(n=>n.rank))].map(r=>nodes.filter(n=>n.rank===r).length));
+const width=Math.max(760,(maxRank+1)*260+40),height=Math.max(410,maxRows*108+60);
+const edges=(graphData?.edges||[]).filter(e=>pos[e.source]&&pos[e.target]).map(e=>{const a=pos[e.source],b=pos[e.target],sx=a.x+216,sy=a.y+30,ex=b.x,ey=b.y+30;const control=Math.max(35,(ex-sx)/2);return `<path class="dag-edge" d="M${sx},${sy} C${sx+control},${sy} ${ex-control},${ey} ${ex},${ey}" marker-end="url(#dag-arrow)"/>`}).join('');
+const statusColors={completed:'#1f6c5f',running:'#245b85',pending:'#34455b',failed:'#8e3d4a',blocked:'#876134',waiting_approval:'#67528b'};
+const shapes=nodes.map(n=>{const p=pos[n.id],title=escape(n.title.length>30?n.title.slice(0,30)+'…':n.title),state=escape(n.status),color=statusColors[n.status]||'#34455b',chosen=selectedTask===n.id;return `<g class="dag-node" tabindex="0" role="button" aria-label="查看任务 ${escape(n.id)}" data-node="${escape(n.id)}" transform="translate(${p.x},${p.y})"><rect class="node-rect" width="216" height="66" rx="10" fill="${color}" stroke="${chosen?'#f3d28b':'#55758c'}" stroke-width="${chosen?3:1.4}"/><text x="12" y="24" font-size="13" fill="#fff">${title}</text><text x="12" y="46" font-size="11" fill="#d5e7ef">${state}${n.cycle?' · cycle':''}${n.hidden_dependencies?' · 外部依赖隐藏':''}</text></g>`}).join('');
+const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" style="width:${Math.round(width*graphZoom)}px;height:${Math.round(height*graphZoom)}px" aria-label="任务依赖图"><defs><marker id="dag-arrow" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#6487a1"/></marker></defs>${edges}${shapes}</svg>`;
+const t=taskTrace?.task;
+const trace=selectedTask?(t?`<h3>任务详情</h3><div class="hint">${escape(t.id)}</div><p>${escape(t.title)}</p><dl><dt>状态</dt><dd>${escape(t.status)}</dd><dt>尝试</dt><dd>${escape(t.attempts)}</dd><dt>所需能力</dt><dd>${escape((t.required_capabilities||[]).join(', ')||'未指定')}</dd><dt>选定能力</dt><dd>${escape(t.selected_capability||'未指定')}</dd><dt>批准</dt><dd>${t.approved?'是':'否'}</dd><dt>结果制品</dt><dd>${t.result_available?'已记录':'尚无'}</dd><dt>更新</dt><dd>${t.updated_at?new Date(t.updated_at*1000).toLocaleString():'未知'}</dd></dl>${taskTrace?.planning?`<div class="graph-info">规划：${escape(taskTrace.planning.status)} · ${escape(taskTrace.planning.backend||'')} · 步骤 ${escape(taskTrace.planning.count||0)} ${taskTrace.planning.message?' · '+escape(taskTrace.planning.message):''}</div>`:''}${t.error?`<div class="graph-info">${escape(t.error)}</div>`:''}<div class="related"><button id="jump-task-chat">前往对话</button><button id="jump-task-logs">查看日志</button>${t.status==='completed'?'<button id="open-task-result">刷新最终结果</button>':''}${t.status==='pending'?(taskTrace?.planning?(taskTrace.planning.status==='failed'?'<button id="retry-planning">重新规划（管理员）</button>'+(taskTrace?.direct_eligible?'<button id="direct-failed">简单问答直接执行（管理员）</button>':''):taskTrace.planning.status==='direct'&&taskTrace?.direct_eligible?'<button id="direct-failed">重新尝试安全派发（管理员）</button>':''):'<button id="activate-task" title="管理员：给旧任务绑定已批准的默认执行能力并尝试派发">激活 / 重新派发</button>'):''}</div>${t.status==='completed'?'<section class="dag-final-result"><h3>最终结果</h3><div id="dag-result-detail" aria-live="polite">正在加载最终结果…</div></section>':''}${taskTrace?.source_message?`<p class="hint">来源：会话 ${escape(taskTrace.source_message.session)} · 消息 ${escape(taskTrace.source_message.id.slice(0,8))}</p>`:''}<h3 style="margin-top:20px">相关事件</h3>${(taskTrace.events||[]).length?taskTrace.events.map(e=>`<div class="dag-evt"><div>${escape(e.kind)} #${e.id}</div><small>${new Date(e.created*1000).toLocaleString()}</small></div>`).join(''):'<p class="muted">暂无直接关联事件；普通 Worker 日志未绑定到本任务时不会显示。</p>'}`:'<p class="muted">加载任务轨迹...</p>'):'<p class="muted">选择一个任务节点，查看能力、状态、错误与关联事件。</p>';
+target.innerHTML=`<section class="panel"><div class="graphbar"><input id="graph-search" placeholder="搜索任务 / ID" value="${escape(graphSearch)}"><select id="graph-filter"><option value="all">全部状态</option>${['pending','running','completed','failed','blocked','waiting_approval'].map(s=>`<option value="${s}" ${graphFilter===s?'selected':''}>${s}</option>`).join('')}</select><button id="zoom-out" aria-label="缩小">−</button><span id="zoom-label" class="hint">${Math.round(graphZoom*100)}%</span><button id="zoom-in" aria-label="放大">＋</button><button id="zoom-reset">重置</button><button id="graph-refresh">刷新 DAG</button></div>${graphData?.has_cycles?'<p class="graph-info">任务依赖中检测到环，已标记相关任务；请在任务中心修复。</p>':''}${graphData?.hidden_dependency_count?'<p class="graphhint">部分依赖不可见（可能属于其他工作区或尚未同步），已隐藏其标识。</p>':''}<div class="graphshell"><div class="dagviewport" id="dagviewport">${svg}</div><div class="dagdetails">${trace}</div></div><p class="graphhint">节点可点击或键盘 Enter/空格选择；使用缩放按钮和滚动浏览。仅显示当前工作区已授权任务。</p></section><section class="panel" style="margin-top:14px"><h3>提交新任务</h3><form class="form" id="task-form"><textarea id="task-text" required maxlength="4000" placeholder="输入需要完成的研究目标或任务..."></textarea><button class="primary">确认提交任务</button></form><p id="last-submit-result" class="graph-info hidden" role="status"></p><details class="runtimecontrols"><summary>自动执行策略（管理员配置）</summary><form id="execution-policy-form" class="form"><label><input type="checkbox" id="policy-enabled" style="width:auto"> 提交后自动派发</label><input id="policy-capability" placeholder="已审批执行能力 ID，如 analysis" required><div class="row"><input id="policy-cpu" type="number" min="0" value="1000" required placeholder="CPU mCPU"><input id="policy-mem" type="number" min="0" value="1024" required placeholder="内存 MiB"><input id="policy-gpu" type="number" min="0" value="0" required placeholder="GPU"></div><button>保存策略</button><p id="policy-status" class="hint">需管理员事先批准能力并配置 Worker 和资源。</p></form></details><details class="runtimecontrols"><summary>自适应任务判断（Claude / Codex SDK 或 CLI）</summary><form id="routing-policy-form" class="form"><label><input type="checkbox" id="routing-enabled" style="width:auto"> 对不明确的任务让 Claude / Codex 判断是否需要 DAG</label><select id="routing-backend"><option value="codex_sdk">Codex SDK（只读）</option><option value="claude_sdk">Claude Agent SDK（禁用工具）</option><option value="codex_cli">Codex CLI（只读）</option><option value="claude_cli">Claude CLI（禁用工具）</option></select><button>保存路由策略</button><p id="routing-status" class="hint">简单问答与明确单步骤不调用规划 Agent；复杂或模糊任务可选模型判断。分类失败时安全回退，绝不自动授予执行权限。</p></form></details><details class="runtimecontrols"><summary>Claude / Codex 自动规划（管理员配置）</summary><form id="planning-policy-form" class="form"><label><input type="checkbox" id="planning-enabled" style="width:auto"> 网页提交后调用规划 Agent 自动创建 DAG</label><select id="planning-backend"><option value="codex_sdk">Codex SDK（只读）</option><option value="claude_sdk">Claude Agent SDK（禁用工具）</option><option value="codex_cli">Codex CLI（只读）</option><option value="claude_cli">Claude CLI（禁用工具）</option></select><label><input type="checkbox" id="planning-auto-approve" style="width:auto" checked> 默认批准已审核能力上的安全任务步骤</label><button>保存规划策略</button><p id="planning-status" class="hint">需先设置已批准的默认执行能力与在线 Worker。未知能力或高风险操作不会自动授权。</p></form></details></section>`;
+const search=el('graph-search');search.oninput=()=>{graphSearch=search.value;const focus=search.selectionStart;renderGraph(target);el('graph-search').focus();el('graph-search').setSelectionRange(focus,focus)};
+el('graph-filter').onchange=e=>{graphFilter=e.target.value;renderGraph(target)};
+el('zoom-in').onclick=()=>{graphZoom=Math.min(2,Math.round((graphZoom+.2)*10)/10);renderGraph(target)};
+el('zoom-out').onclick=()=>{graphZoom=Math.max(.6,Math.round((graphZoom-.2)*10)/10);renderGraph(target)};
+el('zoom-reset').onclick=()=>{graphZoom=1;graphSearch='';graphFilter='all';renderGraph(target)};
+el('graph-refresh').onclick=reload;
+target.querySelectorAll('[data-node]').forEach(btn=>{const choose=async()=>{const id=btn.dataset.node;selectedTask=id;taskTrace=null;renderGraph(target);try{const response=await api(root()+'/tasks/'+encodeURIComponent(id)+'/trace');if(selectedTask===id){taskTrace=response;renderGraph(target)}}catch(err){toast(err.message)}};btn.onclick=choose;btn.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();choose()}}});
+if(el('dag-result-detail'))loadDagResult(selectedTask,false);
+if(el('jump-task-chat'))el('jump-task-chat').onclick=()=>{chatSession=taskTrace?.source_message?.session||'main';navigate('home')};
+if(el('jump-task-logs'))el('jump-task-logs').onclick=()=>navigate('logs');
+if(el('open-task-result'))el('open-task-result').onclick=()=>loadDagResult(selectedTask,true);
+if(el('routing-policy-form')){
+  el('routing-policy-form').onsubmit=async e=>{e.preventDefault();try{const body={enabled:el('routing-enabled').checked,backend:el('routing-backend').value};await api(root()+'/routing-policy',body,'PUT');toast('自适应路由策略已保存');el('routing-status').textContent=body.enabled?'已启用 '+body.backend+' 的只读任务复杂度判断。':'已关闭模型路由，使用保守规则判断。';}catch(err){toast(err.message)}};
+  api(root()+'/routing-policy').then(p=>{if(!el('routing-enabled'))return;el('routing-enabled').checked=!!p.enabled;el('routing-backend').value=p.backend||'codex_sdk';el('routing-status').textContent=p.enabled?'当前分类后端：'+p.backend+'；可选地判断模糊任务。':'默认使用安全规则路由，启用后对模糊任务调用 Claude/Codex 分类。';}).catch(()=>{});
+}
+if(el('planning-policy-form')){
+  el('planning-policy-form').onsubmit=async e=>{e.preventDefault();try{const body={enabled:el('planning-enabled').checked,backend:el('planning-backend').value,auto_approve_trusted:el('planning-auto-approve').checked};await api(root()+'/planning-policy',body,'PUT');toast('任务规划策略已保存');el('planning-status').textContent=body.enabled?'已启用；提交新任务时将调用 '+body.backend+'。':'自动规划未启用。';}catch(err){toast(err.message)}};
+  api(root()+'/planning-policy').then(p=>{if(!el('planning-enabled'))return;el('planning-enabled').checked=!!p.enabled;el('planning-backend').value=p.backend||'codex_sdk';el('planning-auto-approve').checked=!!p.auto_approve_trusted;el('planning-status').textContent=p.enabled?'当前规划后端：'+p.backend+'。简单问答和单步骤只走已批准执行能力；复杂任务才调用规划。':'未启用自动规划。';}).catch(()=>{});
+}
+if(el('retry-planning'))el('retry-planning').onclick=async()=>{if(!confirm('重新调用规划 Agent？'))return;try{const result=await api(root()+'/tasks/'+encodeURIComponent(selectedTask)+'/replan',{},'POST');toast('规划：'+result.status+(result.message?' · '+result.message:''));await reload()}catch(err){toast(err.message)}};
+if(el('direct-failed'))el('direct-failed').onclick=async()=>{if(!confirm('仅允许简单问答跳过规划；仍需能力审批和 Worker 授权；执行成功后自动展示结果。继续？'))return;try{const result=await api(root()+'/tasks/'+encodeURIComponent(selectedTask)+'/direct',{},'POST');toast('直接派发：'+result.dispatch.state+(result.dispatch.reason?' · '+result.dispatch.reason:''));await reload()}catch(err){toast(err.message)}};
+if(el('activate-task'))el('activate-task').onclick=async()=>{if(!confirm('使用管理员批准的默认执行能力激活此任务并尝试派发？'))return;try{let result=await api(root()+'/tasks/'+encodeURIComponent(selectedTask)+'/activate',{},'POST');toast('派发：'+result.dispatch.state+(result.dispatch.reason?' · '+result.dispatch.reason:''));await reload()}catch(err){toast(err.message)}};
+el('task-form').onsubmit=submitTask;if(el('execution-policy-form')){
+  el('execution-policy-form').onsubmit=async e=>{e.preventDefault();try{const policy={enabled:el('policy-enabled').checked,capability:el('policy-capability').value,resources:{cpu_milli:Number(el('policy-cpu').value),memory_mb:Number(el('policy-mem').value),gpu_units:Number(el('policy-gpu').value)}};await api(root()+'/execution-policy',policy,'PUT');toast('执行策略已保存');}catch(err){toast(err.message)}};
+  api(root()+'/execution-policy').then(p=>{if(!el('policy-capability'))return;el('policy-enabled').checked=!!p.enabled;el('policy-capability').value=p.capability||'';if(p.resources){el('policy-cpu').value=p.resources.cpu_milli;el('policy-mem').value=p.resources.memory_mb;el('policy-gpu').value=p.resources.gpu_units;}el('policy-status').textContent=p.enabled?'提交后自动派发已启用；需要在线 Worker 才能实际执行。':'自动派发未启用；提交任务会等待管理员配置。';}).catch(()=>{});
+}
+}
+
+function renderTopology(target){
+ const src=topologyData||{nodes:[],edges:[],counts:{}};
+ const nodes=src.nodes.filter(n=>!topologySearch||(n.label+' '+n.ref).toLowerCase().includes(topologySearch.toLowerCase()));
+ const positions={}, groups={task:[],capability:[],worker:[]};
+ for(const n of nodes)(groups[n.kind]||groups.task).push(n);
+ for(const kind of ['task','capability','worker'])groups[kind].sort((a,b)=>a.ref.localeCompare(b.ref));
+ const maxRows=Math.max(1,...Object.values(groups).map(g=>g.length));
+ const width=950,height=Math.max(480,maxRows*91+96);
+ const base={task:24,capability:334,worker:644};
+ for(const kind of ['task','capability','worker'])groups[kind].forEach((n,i)=>positions[n.id]={x:base[kind],y:65+i*91});
+ const center=n=>({x:positions[n].x+119,y:positions[n].y+25});
+ let links='';const kindColors={depends_on:'#536c86',requires:'#ad8a4c',selected:'#49c6b8',reported_on:'#8b7cd6',reservation:'#e7a75f',repair_dependency:'#e77ea7',dispatch:'#4db5ed'};
+ for(const e of src.edges){if(!positions[e.source]||!positions[e.target])continue;const a=center(e.source),b=center(e.target),x1=a.x+(b.x>a.x?113:-113),x2=b.x+(a.x>b.x?113:-113);const stroke=kindColors[e.kind]||'#55738d';links+=`<path d="M${x1},${a.y} C${(x1+x2)/2},${a.y} ${(x1+x2)/2},${b.y} ${x2},${b.y}" fill="none" stroke="${stroke}" stroke-width="${e.kind==='selected'?2.8:1.5}" opacity=".78"><title>${escape(e.kind)} · ${escape(e.evidence)}</title></path>`}
+ const palette={task:'#235779',capability:'#6b5532',worker:'#285d53'};
+ const shapes=nodes.map(n=>{const p=positions[n.id];const color=n.status==='failed'||n.status==='blocked'?'#863e49':n.status==='stale'?'#694f3b':palette[n.kind];return `<g class="toponode" tabindex="0" role="button" data-topoid="${escape(n.id)}" transform="translate(${p.x},${p.y})"><rect width="238" height="53" rx="10" fill="${color}" stroke="${topologyFocus===n.id?'#f4d391':'#66889e'}" stroke-width="${topologyFocus===n.id?3:1.2}"/><text fill="#f5fbff" x="11" y="21" font-size="12">${escape(n.label.length>31?n.label.slice(0,31)+'…':n.label)}</text><text fill="#c4dae7" x="11" y="39" font-size="10">${escape(n.status||'unknown')} · ${escape(n.ref.length>23?n.ref.slice(0,23)+'…':n.ref)}</text></g>`}).join('');
+ const chosen=src.nodes.find(n=>n.id===topologyFocus);
+ const related=chosen?src.edges.filter(e=>e.source===chosen.id||e.target===chosen.id):[];
+ const detail=chosen?`<h3>${escape(chosen.kind)} · ${escape(chosen.label)}</h3><p class="hint">${escape(chosen.ref)}</p><p>状态：${escape(chosen.status||'unknown')}</p>${chosen.resources?`<p>预留：${chosen.resources.reserved.cpu_milli} mCPU / ${chosen.resources.reserved.memory_mb} MiB / ${chosen.resources.reserved.gpu_units} GPU</p>`:''}<p>关联边：${related.length}</p><div class="hint">${related.map(e=>`<p>${escape(e.kind)} · ${escape(e.evidence)}</p>`).join('')||'暂无已验证连接证据'}</div>${chosen.kind==='task'?'<button id="topo-to-task">打开任务轨迹</button>':''}${chosen.kind==='worker'?'<button id="topo-to-worker">查看 Worker</button>':''}`:'<h3>节点详情</h3><p class="muted">选择任务、能力或 Worker 节点查看关系。未验证的能力健康状态显示为 unknown。</p>';
+ const c=src.counts||{},rt=src.runtime||{};
+ const caps=rt.capacity||[],assignments=rt.assignments||[],repairs=rt.repairs||[],dispatches=src.dispatches||[];
+ const resourceCards=caps.map(c=>`<div class="resourcecard"><b>${escape(c.worker)}</b><div class="resrow">CPU <span>${c.reserved.cpu_milli} / ${c.capacity.cpu_milli} mCPU</span></div><progress max="${Math.max(1,c.capacity.cpu_milli)}" value="${c.reserved.cpu_milli}"></progress><div class="resrow">RAM <span>${c.reserved.memory_mb} / ${c.capacity.memory_mb} MiB</span></div><progress max="${Math.max(1,c.capacity.memory_mb)}" value="${c.reserved.memory_mb}"></progress><div class="resrow">GPU <span>${c.reserved.gpu_units} / ${c.capacity.gpu_units}</span></div><progress max="${Math.max(1,c.capacity.gpu_units)}" value="${c.reserved.gpu_units}"></progress></div>`).join('');
+ const assignmentRows=assignments.slice(-40).reverse().map(a=>`<div class="resitem"><b>${escape(a.state)}</b> · ${escape(a.worker)} ⇐ ${escape(a.task.slice(0,12))} · ${a.resources.cpu_milli}mCPU / ${a.resources.memory_mb}MiB / ${a.resources.gpu_units} GPU</div>`).join('');
+ const dispatchRows=dispatches.slice(0,35).map(j=>`<div class="resitem"><b>${escape(j.state)}</b> · ${escape(j.worker)} ⇐ ${escape(j.task_id.slice(0,12))}  <small>${escape(j.id.slice(0,12))}</small></div>`).join('');
+ const repairRows=repairs.map(r=>`<div class="resitem">${escape(r.task.slice(0,12))} → ${escape(r.repair_task.slice(0,12))} (${escape(r.state)})</div>`).join('');
+ target.innerHTML=`<section class="panel"><div class="graphbar"><input id="topo-search" placeholder="搜索任务、能力、Worker" value="${escape(topologySearch)}"><button id="topo-out">－</button><span class="hint">${Math.round(topologyZoom*100)}%</span><button id="topo-in">＋</button><button id="topo-refresh">刷新</button></div><div class="topocounts"><span>任务 ${c.tasks||0}</span><span>能力 ${c.capabilities||0}</span><span>Worker ${c.workers||0}</span><span>运行中 ${c.running_tasks||0}</span><span>失败/阻塞 ${c.failed_or_blocked||0}</span><span>资源预留 ${assignments.filter(a=>['reserved','claimed','reported','uncertain'].includes(a.state)).length}</span><span>修复关系 ${repairs.length}</span><span>调度派发 ${dispatches.length}</span></div><div class="topolegend"><span><i class="toposwatch" style="background:#235779"></i>任务中心</span><span><i class="toposwatch" style="background:#6b5532"></i>能力中心（未验证健康）</span><span><i class="toposwatch" style="background:#285d53"></i>Worker</span><span><i class="toposwatch" style="background:#e7a75f"></i>任务资源预留/租约</span><span><i class="toposwatch" style="background:#e77ea7"></i>修复依赖</span><span><i class="toposwatch" style="background:#4db5ed"></i>实际派发工单</span></div><div class="topolayout"><div class="topoview"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" style="width:${Math.round(width*topologyZoom)}px;height:${Math.round(height*topologyZoom)}px" aria-label="任务能力 Worker 拓扑"><text x="30" y="28" fill="#b5d6ea" font-size="16">任务中心 / Task</text><text x="340" y="28" fill="#d8c18b" font-size="16">能力中心 / Skill · MCP</text><text x="651" y="28" fill="#8bd6c4" font-size="16">Worker / Runtime</text>${links}${shapes}</svg></div><aside class="topodetail">${detail}</aside></div><div class="resourcepanels"><section><h3>Worker 配额与资源占用</h3><div class="resourcegrid">${resourceCards||'<p class="muted">尚未配置 Worker 配额</p>'}</div></section><section><h3>任务预留和租约记录</h3>${assignmentRows||'<p class="muted">暂无资源预留</p>'}<h3 style="margin-top:18px">派发与独立复核</h3>${dispatchRows||'<p class="muted">暂无派发记录</p>'}<h3 style="margin-top:18px">修复任务关系</h3>${repairRows||'<p class="muted">暂无经记录的修复关联</p>'}</section></div><details class="runtimecontrols"><summary>资源调度操作（管理员）</summary><div class="resourcepanels"><form id="quota-form" class="form"><h3>设置 Worker 配额</h3><input id="quota-worker" placeholder="Worker ID" required><input id="quota-cpu" type="number" min="0" max="1000000" placeholder="CPU (mCPU)" required><input id="quota-mem" type="number" min="0" max="10000000" placeholder="RAM (MiB)" required><input id="quota-gpu" type="number" min="0" max="256" placeholder="GPU 数量" required><button>保存配额</button></form><form id="reserve-form" class="form"><h3>预留任务资源（不自动执行）</h3><input id="reserve-task" placeholder="Task ID" required><input id="reserve-worker" placeholder="Worker ID" required><input id="reserve-cpu" type="number" min="0" max="1000000" placeholder="CPU (mCPU)" required><input id="reserve-mem" type="number" min="0" max="10000000" placeholder="RAM (MiB)" required><input id="reserve-gpu" type="number" min="0" max="256" placeholder="GPU 数量" required><button>提交资源预留</button></form><form id="skills-form" class="form"><h3>管理员登记 Worker 已批准适配器</h3><input id="skills-worker" placeholder="Worker ID" required><input id="skills-list" placeholder="能力 ID，英文逗号分隔" required><button>保存 Worker 能力</button></form><form id="dispatch-form" class="form"><h3>自动选择最高优先级就绪任务</h3><input id="dispatch-cpu" type="number" min="0" max="1000000" placeholder="CPU mCPU" required><input id="dispatch-mem" type="number" min="0" max="10000000" placeholder="RAM MiB" required><input id="dispatch-gpu" type="number" min="0" max="256" placeholder="GPU 数量" required><button>按配额与能力自动派发</button><p class="hint">需要在线 Worker。派发是待领取工单，实际执行需要受限 Worker 客户端。</p></form></div></details><p class="graphhint">资源数值为调度器预留配额，不是 CPU/GPU 的实时硬件利用率；reserved 为资源意图，claimed 是 Worker 已领取，uncertain 保持占用等待人工核对。worker reported_on 仅代表日志关联，并不证明正在执行。能力 lifecycle 属于人工登记的审核证据，不是在线健康探测。</p>${src.hidden_dependency_count?`<p class="graph-info">${src.hidden_dependency_count} 个依赖不在当前可见工作区，标识已隐藏。</p>`:''}</section>`;
+ const search=el('topo-search');search.oninput=()=>{topologySearch=search.value;const at=search.selectionStart;renderTopology(target);el('topo-search').focus();el('topo-search').setSelectionRange(at,at)};
+ el('topo-in').onclick=()=>{topologyZoom=Math.min(2,Math.round((topologyZoom+.2)*10)/10);renderTopology(target)};
+ el('topo-out').onclick=()=>{topologyZoom=Math.max(.6,Math.round((topologyZoom-.2)*10)/10);renderTopology(target)};
+ el('topo-refresh').onclick=reload;
+ const getResources=prefix=>({cpu_milli:Number(el(prefix+'-cpu').value),memory_mb:Number(el(prefix+'-mem').value),gpu_units:Number(el(prefix+'-gpu').value)});
+ el('quota-form').onsubmit=async e=>{e.preventDefault();if(!confirm('确认更新 Worker 资源配额？'))return;try{await api(root()+'/runtime/workers/'+encodeURIComponent(el('quota-worker').value)+'/capacity',getResources('quota'),'PUT');toast('配额已保存');await reload()}catch(err){toast(err.message)}};
+ el('skills-form').onsubmit=async e=>{e.preventDefault();if(!confirm('确认 Worker 在本地已配置并审核这些执行适配器？'))return;try{const worker=el('skills-worker').value;const capabilities=el('skills-list').value.split(',').map(x=>x.trim()).filter(Boolean);await api(root()+'/dispatch/workers/'+encodeURIComponent(worker)+'/skills',{capabilities},'PUT');toast('Worker 能力声明已更新');await reload()}catch(err){toast(err.message)}};
+ el('dispatch-form').onsubmit=async e=>{e.preventDefault();if(!confirm('按优先级自动选择就绪任务并创建派发工单？'))return;try{const x=await api(root()+'/dispatch/next',{request_id:crypto.randomUUID(),resources:getResources('dispatch')},'POST');toast(x.state==='no_eligible_task'?'无满足能力/资源条件的就绪任务':'已派发到 '+x.worker);await reload()}catch(err){toast(err.message)}};
+ target.querySelectorAll('[data-review]').forEach(btn=>btn.onclick=async()=>{try{const id=btn.dataset.review;const e=await api(root()+'/dispatch/'+encodeURIComponent(id)+'/evidence');const answer=prompt('待复核结果（供人工独立评估）：\n'+(e.result||'').slice(0,1500)+'\n\n输入验证证据引用（取消则不执行复核）：');if(!answer)return;const accepted=confirm('是否确认已进行独立验证并批准该结果？取消将拒绝该结果。');await api(root()+'/dispatch/'+encodeURIComponent(id)+'/review',{accepted,evidence_ref:answer,expected_sha256:e.sha256},'POST');toast('复核已记录');await reload()}catch(err){toast(err.message)}});
+ el('reserve-form').onsubmit=async e=>{e.preventDefault();if(!confirm('确认预留资源？该操作不会自动执行任务。'))return;try{await api(root()+'/runtime/reservations',{task_id:el('reserve-task').value,worker:el('reserve-worker').value,request_id:crypto.randomUUID(),resources:getResources('reserve')},'POST');toast('预留已登记，等待 Worker 领取');await reload()}catch(err){toast(err.message)}};
+
+ target.querySelectorAll('[data-topoid]').forEach(g=>{const choose=()=>{topologyFocus=g.dataset.topoid;renderTopology(target)};g.onclick=choose;g.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();choose()}}});
+ if(el('topo-to-task'))el('topo-to-task').onclick=()=>{selectedTask=chosen.ref;navigate('tasks')};
+ if(el('topo-to-worker'))el('topo-to-worker').onclick=()=>navigate('workers');
+}
+
+function showResultView(container, view, raw, modeStore=null, modeKey=null){
+ const human=String(view?.text??raw??''), source=String(raw??'');
+ container.innerHTML='<div class="result-tabs"><button data-mode="readable" aria-pressed="true">阅读模式</button><button data-mode="raw" aria-pressed="false">原始证据</button><button data-mode="copy">复制当前内容</button></div><pre id="review-full-result" class="reviewresult result-view" data-result-text></pre><p class="hint">阅读模式仅用于呈现；原始证据与 SHA256 不会修改。</p>';
+ const pre=container.querySelector('[data-result-text]');let mode=modeStore?.get(modeKey)||'readable';
+ const draw=()=>{pre.textContent=mode==='readable'?human:source;container.querySelectorAll('[data-mode="readable"],[data-mode="raw"]').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.mode===mode)))};
+ container.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{if(b.dataset.mode==='copy'){navigator.clipboard?.writeText(pre.textContent).then(()=>toast('结果已复制')).catch(()=>toast('无法复制，请手动选择'))}else{mode=b.dataset.mode;if(modeStore)modeStore.set(modeKey,mode);draw()}});draw();
+}
+// DAG is the only completed-result UI. Keep the existing read-only, workspace-scoped API.
+// A cache prevents periodic DAG refresh from losing the reader or re-requesting evidence.
+async function loadDagResult(id,force=false){
+ if(!id||page!=='tasks'||selectedTask!==id)return;
+ const key=ws+':'+id, target=el('dag-result-detail');
+ if(!target)return;
+ if(force){dagResultCache.delete(key);dagResultMode.delete(key)}
+ if(dagResultCache.has(key)){
+  const r=dagResultCache.get(key);
+  target.innerHTML='<div class="hint" id="dag-result-meta"></div><div id="dag-result-view"></div>';
+  target.querySelector('#dag-result-meta').textContent=r.prompt+' · '+r.task_id;
+  showResultView(target.querySelector('#dag-result-view'),r.presentation,r.result,dagResultMode,key);
+  return;
+ }
+ if(dagResultPending.has(key))return;
+ dagResultPending.add(key);
+ target.textContent='正在加载最终结果…';
+ try{
+  const r=await api(root()+'/tasks/'+encodeURIComponent(id)+'/result');
+  dagResultCache.set(key,r);
+  if(page==='tasks'&&selectedTask===id&&ws+':'+id===key)loadDagResult(id);
+ }catch(err){if(page==='tasks'&&selectedTask===id&&el('dag-result-detail'))el('dag-result-detail').textContent='加载结果失败：'+err.message}
+ finally{dagResultPending.delete(key)}
+}
+function renderReviews(target){
+ const items=acceptanceQueue?.pending||[],pol=acceptancePolicy||{};
+ const rows=items.map(x=>`<article class="reviewcard"><div class="reviewhead"><b>${escape(x.task_title)}</b><span class="tag">${escape(x.tier)} · 待审核</span></div><div class="hint">任务 ${escape(x.task_id)} · Worker ${escape(x.worker)} · 派发 ${escape(x.id)} · 结果 SHA256 ${escape((x.result_hash||'').slice(0,16))}…</div><div class="reviewactions"><button data-inspect-review="${escape(x.id)}">查看完整结果 / 人工审核</button><button data-auto-review="${escape(x.id)}">按当前策略尝试自动验证</button></div></article>`).join('');
+ target.innerHTML=`<section class="panel"><h3>结果审核队列 <span class="tag">${items.length} 项</span></h3><p class="muted">Worker 已回报不等于完成。L1 仅核验文本交付，L2 必须独立验证，L3 必须独立验证加人工确认。待审核结果保留资源占用。</p>${rows||'<p class="notice">目前没有待审核的执行结果。</p>'}<button id="review-refresh">刷新审核队列</button></section><section class="panel" style="margin-top:16px"><h3>三级验收策略（管理员）</h3><form id="acceptance-policy-form" class="form"><label><input type="checkbox" id="acceptance-enabled" ${pol.enabled?'checked':''}> 启用分级结果验收</label><label><input type="checkbox" id="acceptance-l1" ${pol.auto_l1?'checked':''}> L1 简单问答：自动核验文本交付</label><label>L1 自动验收可信能力白名单（英文逗号分隔）<input id="acceptance-l1-caps" placeholder="例如 chat,qa" value="${escape((pol.l1_capabilities||[]).join(','))}"></label><label><input type="checkbox" id="acceptance-l2" ${pol.auto_l2?'checked':''}> L2 代码与数据：独立验证器通过后自动验收</label><div class="notice">L3 科研、高风险和敏感任务始终需要独立验证及人工签核。关闭自动验收不影响人工审核入口。对于 L1，系统不保证回答的事实正确。</div><button class="primary">保存验收策略</button></form></section><section id="review-detail" class="panel" style="margin-top:16px"><h3>审核详情</h3><p class="muted">选择一条待审核结果，查看完整原文与 SHA256，并填写审核证据。</p></section>`;
+ el('review-refresh').onclick=reload;
+ el('acceptance-policy-form').onsubmit=async ev=>{ev.preventDefault();try{await api(root()+'/acceptance/policy',{enabled:el('acceptance-enabled').checked,auto_l1:el('acceptance-l1').checked,auto_l2:el('acceptance-l2').checked,l1_capabilities:el('acceptance-l1-caps').value.split(',').map(s=>s.trim()).filter(Boolean)},'PUT');toast('验收策略已保存');await reload()}catch(err){toast(err.message)}};
+ target.querySelectorAll('[data-auto-review]').forEach(btn=>btn.onclick=async()=>{try{const out=await api(root()+'/acceptance/'+encodeURIComponent(btn.dataset.autoReview)+'/evaluate',{},'POST');toast(out.status==='auto_verified'?'独立核验通过，任务已完成':(out.reason||'仍需人工审核'));await reload()}catch(err){toast(err.message)}});
+ target.querySelectorAll('[data-inspect-review]').forEach(btn=>btn.onclick=async()=>{try{const id=btn.dataset.inspectReview,detail=el('review-detail');const x=await api(root()+'/dispatch/'+encodeURIComponent(id)+'/evidence');const tier=items.find(j=>j.id===id)?.tier||'L2';detail.innerHTML=`<h3>审核结果 · ${escape(tier)}</h3><div class="hint">任务：${escape(x.task_id)}　Worker：${escape(x.worker)}　声明：${escape(x.worker_state)}</div><p class="hint">结果 SHA256: <code>${escape(x.sha256)}</code></p><h4>执行结果（阅读模式 / 原始证据）</h4><div id="review-result-view"></div><form id="review-decision-form" class="form"><label>审核依据或独立验证引用（至少 8 字符）<textarea id="review-evidence" rows="3" minlength="8" maxlength="256" required placeholder="填写检查记录或外部验证报告 ID。L2/L3 还要求服务端独立验证器通过。"></textarea></label><label><input id="review-confirm" type="checkbox" required> 我已核对完整结果，并理解验收等级及证据要求</label><div class="reviewactions"><button type="submit" class="primary" id="review-accept">审核通过</button><button type="button" class="danger" id="review-reject">审核拒绝</button></div></form>`;showResultView(el('review-result-view'),x.presentation,x.result);
+ const send=async accepted=>{const note=el('review-evidence').value.trim();if(note.length<8||!el('review-confirm').checked){toast('请先填写审核依据并确认已核对原文');return}if(!confirm(accepted?'确认验收通过并完成任务？':'确认拒绝结果并结束本次执行？'))return;try{const out=await api(root()+'/dispatch/'+encodeURIComponent(id)+'/review',{accepted,evidence_ref:note,expected_sha256:x.sha256},'POST');toast('审核结果：'+out.state);await reload()}catch(err){toast(err.message)}};
+ el('review-decision-form').onsubmit=e=>{e.preventDefault();send(true)};el('review-reject').onclick=()=>send(false);detail.scrollIntoView({block:'nearest',behavior:'smooth'});
+ }catch(err){toast(err.message)}});
+}
+
+function navigate(destination){page=destination==='chat'?'home':destination;el('nav').querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.page===page));if(page==='tasks'||page==='topology'||page==='reviews')reload();else render()}
+const rootPath=()=>root();async function submitTask(e){e.preventDefault();if(!confirm('确认将此内容提交至 TaskCenter？'))return;try{const result=await api(root()+'/tasks',{prompt:el('task-text').value,request_id:crypto.randomUUID()},'POST');selectedTask=result.id;toast('任务已提交：'+(result.planning?.status||result.dispatch?.state||'pending')+(result.dispatch?.reason?' · '+result.dispatch.reason:''));if(el('last-submit-result')){el('last-submit-result').classList.remove('hidden');el('last-submit-result').textContent=result.planning?'规划状态：'+result.planning.status+'；步骤数：'+(result.planning.count||0)+'；派发工单：'+(result.dispatch?.offers||[]).filter(o=>o.state==='offered').length+'。'+(result.planning.message||''):'派发状态：'+result.dispatch?.state+'。'+(result.dispatch?.reason||'')}await reload()}catch(e){toast(e.message)}}
+async function submitMessageAsTask(messageId,messages){
+const msg=messages.find(m=>m.id===messageId&&m.author===uid&&m.role==='user');
+if(!msg||!confirm('将这条消息原样提交到任务中心？'))return;
+try{const created=await api(root()+'/tasks',{prompt:msg.body,source_message_id:messageId,request_id:crypto.randomUUID()},'POST');selectedTask=created.id;toast('已从对话创建任务');navigate('tasks')}catch(err){toast(err.message)}
+}
+async function sendChat(e){e.preventDefault();try{await api(root()+'/chat',{session:chatSession,body:el('chat-text').value},'POST');el('chat-text').value='';await loadChat()}catch(e){toast(e.message)}}
+async function loadChat(){try{const d=await api(root()+'/chat/'+encodeURIComponent(chatSession));const target=el('chat-list');if(target){target.innerHTML=d.messages.map(m=>`<div class="bubble ${m.author===uid?'mine':''}"><div class="who">${escape(m.author.slice(0,8))} · ${escape(m.role)}</div>${fmt(m.body)}${m.author===uid&&m.role==='user'?`<div class="related"><button data-message-task="${escape(m.id)}">转为任务</button></div>`:''}</div>`).join('');target.scrollTop=target.scrollHeight;target.querySelectorAll('[data-message-task]').forEach(b=>b.onclick=()=>submitMessageAsTask(b.dataset.messageTask,d.messages))}}catch(e){toast(e.message)}}
+async function askModel(e){e.preventDefault();el('ai-reply').textContent='模型请求中...';try{let d=await api(root()+'/models/chat',{session:chatSession,message:el('ai-text').value},'POST');el('ai-reply').textContent=d.answer;await loadChat()}catch(e){el('ai-reply').textContent=e.message}}
+async function registerWorker(e){e.preventDefault();try{const d=await api(root()+'/workers',{id:el('worker-id').value},'POST');el('worker-secret').textContent='一次性密钥：'+d.secret;await reload()}catch(e){toast(e.message)}}
+async function command(w,a){if(!confirm('确认向 '+w+' 下发 '+a+' 命令？'))return;try{await api(root()+'/workers/'+encodeURIComponent(w)+'/commands',{action:a,payload:{}},'POST');toast('命令已排队，等待 Worker 领取')}catch(e){toast(e.message)}}
+async function saveModel(e){e.preventDefault();try{await api(root()+'/models/config',{base_url:el('model-url').value,model:el('model-name').value},'POST');toast('配置已保存');await reload()}catch(e){toast(e.message)}}
+async function testModel(){el('model-output').textContent='正在连接...';try{let d=await api(root()+'/models/probe',{},'POST');el('model-output').textContent=d.connected?'连接成功，发现 '+d.models_found+' 个模型':('连接失败：'+(d.error?.type||'unknown')+(d.error?.http_status?' (HTTP '+d.error.http_status+')':'')+'；'+(d.error?.message||'请检查服务器日志'))}catch(e){el('model-output').textContent=e.message}}
+async function invite(e){e.preventDefault();try{await api(root()+'/members',{email:el('member-email').value,password:el('member-password').value,role:el('member-role').value},'POST');toast('成员已添加');await reload()}catch(e){toast(e.message)}}
+function appendLog(ev){const t=el('log-stream');if(!t)return;const line=document.createElement('div');line.textContent=`[${new Date(ev.created*1000).toLocaleTimeString()}] ${ev.subject} [${ev.payload?.level}] ${ev.payload?.text}`;t.appendChild(line);if(t.childNodes.length>250)t.removeChild(t.firstChild);t.scrollTop=t.scrollHeight}
+el('login-form').onsubmit=login;el('nav').querySelectorAll('button').forEach(b=>b.onclick=()=>navigate(b.dataset.page));el('workspace').onchange=async()=>{ws=el('workspace').value;chatSession='main';lastEvent=0;selectedTask=null;taskTrace=null;graphData=null;dagResultCache.clear();dagResultPending.clear();dagResultMode.clear();topologyData=null;topologyFocus=null;historySessions=[];historyTasks=[];eventRows=[];eventNextBefore=null;await reload();await refreshHistory(true);connect()};el('logout').onclick=async()=>{try{await api('/api/v2/logout',{},'POST')}catch{}token=null;selectedTask=null;taskTrace=null;dagResultCache.clear();dagResultPending.clear();dagResultMode.clear();if(socket)socket.close();clearInterval(refreshTimer);el('shell').classList.add('hidden');el('login').classList.remove('hidden')};
+})();
+</script></body></html>

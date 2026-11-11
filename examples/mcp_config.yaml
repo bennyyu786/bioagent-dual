@@ -1,0 +1,7 @@
+mcp_servers:
+  example_server:
+    enabled: false
+    command: [python, -m, example_mcp_server]
+    tools:
+      - name: lookup
+        description: Example tool metadata, disabled until configured

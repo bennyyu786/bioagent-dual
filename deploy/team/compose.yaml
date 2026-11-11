@@ -1,0 +1,47 @@
+services:
+  control:
+    build:
+      context: ../..
+      dockerfile: deploy/team/Dockerfile
+    restart: unless-stopped
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,noexec,nosuid
+    volumes:
+      - biomni_state:/srv/biomni/state
+    expose:
+      - "8766"
+    environment:
+      BIOMNI_MODEL_API_KEY: ${BIOMNI_MODEL_API_KEY:-}
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    pids_limit: 150
+    mem_limit: 768m
+    healthcheck:
+      test: ["CMD","python","-c","import urllib.request;urllib.request.urlopen('http://127.0.0.1:8766/health/live',timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  proxy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      BIOMNI_DOMAIN: ${BIOMNI_DOMAIN:?Set BIOMNI_DOMAIN in .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      control:
+        condition: service_healthy
+volumes:
+  biomni_state:
+  caddy_data:
+  caddy_config:

@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "biomni-dual-center"
+version = "0.9.2"
+description = "Task and capability orchestration extension for Biomni"
+requires-python = ">=3.11"
+dependencies = ["PyYAML>=6.0"]
+
+[project.optional-dependencies]
+biomni = ["biomni"]
+test = ["pytest>=7", "httpx>=0.25", "fastapi>=0.110"]
+server = ["fastapi>=0.110", "uvicorn[standard]>=0.27"]
+claude = ["claude-agent-sdk>=0.1"]
+codex = ["openai-codex>=0.1"]
+agents = ["claude-agent-sdk>=0.1", "openai-codex>=0.1"]
+
+[tool.setuptools.packages.find]
+include = ["biomni_dual*"]
+
+[tool.setuptools.package-data]
+biomni_dual = ["web/*.html"]
+
+# Production-facing ASGI app is opt-in. Existing stdlib control server remains
+# available only for backwards-compatible loopback deployments.

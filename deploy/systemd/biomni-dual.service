@@ -1,0 +1,27 @@
+[Unit]
+Description=Biomni Dual Center persistent orchestrator
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=biomni
+Group=biomni
+WorkingDirectory=/opt/biomni-dual
+Environment=PYTHONPATH=/opt/biomni-dual
+ExecStart=/opt/biomni-dual/.venv/bin/python scripts/runtime_daemon.py --bootstrap config.runtime_factory:create_runtime --observability-db /var/lib/biomni-dual/operations.sqlite --reconcile-startup
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=45
+StateDirectory=biomni-dual
+ProtectSystem=strict
+ProtectHome=true
+NoNewPrivileges=true
+PrivateTmp=true
+RestrictSUIDSGID=true
+CapabilityBoundingSet=
+LockPersonality=true
+ReadWritePaths=/var/lib/biomni-dual
+
+[Install]
+WantedBy=multi-user.target

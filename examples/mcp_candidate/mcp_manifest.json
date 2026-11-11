@@ -1,0 +1,5 @@
+{
+  "argv": ["python", "server.py"],
+  "expected_tools": ["echo"],
+  "test_calls": [{"name": "echo", "arguments": {"message": "hello"}}]
+}
