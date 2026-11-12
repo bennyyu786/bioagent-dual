@@ -113,6 +113,36 @@ body.unified-home .homeactions .send{background:#191919!important;color:#fff!imp
 .graphview svg path,.topoview svg path{stroke:#777!important}
 
 
+/* v0.9.6: accessible light DAG and topology surfaces; keep the navigation rail intact. */
+.dagviewport,.topoview{
+ background:radial-gradient(circle,#d9e1e9 1px,transparent 1px) 0 0/24px 24px,#f8fafc!important;
+ border:1px solid #dce3eb!important;color:#172334!important;
+}
+.dagdetails,.topodetail{
+ background:#fff!important;color:#1a2433!important;border:1px solid #d9e0e8!important;
+ box-shadow:0 1px 3px #1d28350a;
+}
+.dagdetails h3,.topodetail h3,.dagdetails p,.dagdetails dd,.dagdetails strong,.dagdetails .topotitle{
+ color:#192433!important;opacity:1!important;
+}
+.dagdetails dt,.topolegend,.topodetail .hint,.graphhint{color:#576579!important}
+.dagdetails dl{grid-template-columns:88px minmax(0,1fr);line-height:1.6;gap:8px 12px}
+.dagdetails dd{overflow-wrap:anywhere}
+.dagdetails .related button,.dagdetails button{background:#fff!important;color:#192433!important;border:1px solid #cdd5df!important}
+.dagdetails .related button:hover,.dagdetails button:hover{background:#eef3f8!important}
+.dagdetails .graph-info,.dagdetails .dag-evt{background:#f8fafc!important;color:#253448!important;border-color:#c8d4e1!important}
+.dagdetails .result-view,.dagdetails .reviewresult{background:#fff!important;color:#202b3c!important;border-color:#dce3e9!important}
+.graphshell .dag-node .node-rect{fill:#fff!important;stroke:#94a3b8!important;stroke-width:1.5!important}
+.graphshell .dag-node text{fill:#172334!important}
+.graphshell .dag-node text:nth-of-type(2){fill:#4a596c!important}
+.graphshell .dag-node:hover .node-rect,.graphshell .dag-node:focus .node-rect{stroke:#2563eb!important;stroke-width:2.5!important}
+.graphshell .dag-node[aria-selected="true"] .node-rect{stroke:#2563eb!important;stroke-width:3!important;fill:#eff6ff!important}
+.graphshell .dag-edge{stroke:#8293a7!important}
+.graphshell svg marker path{fill:#8293a7!important}
+.topoview svg text{fill:#172334!important}
+.topoview svg rect{fill:#fff!important;stroke:#94a3b8!important}
+@media(max-width:1120px){.dagdetails{max-height:58vh;overflow-y:auto}}
+
 /* v0.9.4: selected history owns the upper result pane; compose stays below. */
 .conversation-column:has(.homepage){overflow:hidden!important}
 .conversation-column .homepage{overflow:hidden;min-height:0!important;display:flex;flex-direction:column}
@@ -425,7 +455,7 @@ const nodes=graphNodes(),pos=graphPosition(nodes),maxRank=Math.max(0,...nodes.ma
 const width=Math.max(760,(maxRank+1)*260+40),height=Math.max(410,maxRows*108+60);
 const edges=(graphData?.edges||[]).filter(e=>pos[e.source]&&pos[e.target]).map(e=>{const a=pos[e.source],b=pos[e.target],sx=a.x+216,sy=a.y+30,ex=b.x,ey=b.y+30;const control=Math.max(35,(ex-sx)/2);return `<path class="dag-edge" d="M${sx},${sy} C${sx+control},${sy} ${ex-control},${ey} ${ex},${ey}" marker-end="url(#dag-arrow)"/>`}).join('');
 const statusColors={completed:'#1f6c5f',running:'#245b85',pending:'#34455b',failed:'#8e3d4a',blocked:'#876134',waiting_approval:'#67528b'};
-const shapes=nodes.map(n=>{const p=pos[n.id],title=escape(n.title.length>30?n.title.slice(0,30)+'…':n.title),state=escape(n.status),color=statusColors[n.status]||'#34455b',chosen=selectedTask===n.id;return `<g class="dag-node" tabindex="0" role="button" aria-label="查看任务 ${escape(n.id)}" data-node="${escape(n.id)}" transform="translate(${p.x},${p.y})"><rect class="node-rect" width="216" height="66" rx="10" fill="${color}" stroke="${chosen?'#f3d28b':'#55758c'}" stroke-width="${chosen?3:1.4}"/><text x="12" y="24" font-size="13" fill="#fff">${title}</text><text x="12" y="46" font-size="11" fill="#d5e7ef">${state}${n.cycle?' · cycle':''}${n.hidden_dependencies?' · 外部依赖隐藏':''}</text></g>`}).join('');
+const shapes=nodes.map(n=>{const p=pos[n.id],title=escape(n.title.length>30?n.title.slice(0,30)+'…':n.title),state=escape(n.status),color=statusColors[n.status]||'#34455b',chosen=selectedTask===n.id;return `<g class="dag-node" tabindex="0" role="button" aria-selected="${chosen}" aria-label="查看任务 ${escape(n.id)}" data-node="${escape(n.id)}" transform="translate(${p.x},${p.y})"><rect class="node-rect" width="216" height="66" rx="10" fill="${color}" stroke="${chosen?'#f3d28b':'#55758c'}" stroke-width="${chosen?3:1.4}"/><text x="12" y="24" font-size="13" fill="#fff">${title}</text><text x="12" y="46" font-size="11" fill="#d5e7ef">${state}${n.cycle?' · cycle':''}${n.hidden_dependencies?' · 外部依赖隐藏':''}</text></g>`}).join('');
 const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" style="width:${Math.round(width*graphZoom)}px;height:${Math.round(height*graphZoom)}px" aria-label="任务依赖图"><defs><marker id="dag-arrow" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#6487a1"/></marker></defs>${edges}${shapes}</svg>`;
 const t=taskTrace?.task;
 const trace=selectedTask?(t?`<h3>任务详情</h3><div class="hint">${escape(t.id)}</div><p>${escape(t.title)}</p><dl><dt>状态</dt><dd>${escape(t.status)}</dd><dt>尝试</dt><dd>${escape(t.attempts)}</dd><dt>所需能力</dt><dd>${escape((t.required_capabilities||[]).join(', ')||'未指定')}</dd><dt>选定能力</dt><dd>${escape(t.selected_capability||'未指定')}</dd><dt>批准</dt><dd>${t.approved?'是':'否'}</dd><dt>结果制品</dt><dd>${t.result_available?'已记录':'尚无'}</dd><dt>更新</dt><dd>${t.updated_at?new Date(t.updated_at*1000).toLocaleString():'未知'}</dd></dl>${taskTrace?.planning?`<div class="graph-info">规划：${escape(taskTrace.planning.status)} · ${escape(taskTrace.planning.backend||'')} · 步骤 ${escape(taskTrace.planning.count||0)} ${taskTrace.planning.message?' · '+escape(taskTrace.planning.message):''}</div>`:''}${t.error?`<div class="graph-info">${escape(t.error)}</div>`:''}<div class="related"><button id="jump-task-chat">前往对话</button><button id="jump-task-logs">查看日志</button>${t.status==='completed'?'<button id="open-task-result">刷新最终结果</button>':''}${t.status==='pending'?(taskTrace?.planning?(taskTrace.planning.status==='failed'?'<button id="retry-planning">重新规划（管理员）</button>'+(taskTrace?.direct_eligible?'<button id="direct-failed">简单问答直接执行（管理员）</button>':''):taskTrace.planning.status==='direct'&&taskTrace?.direct_eligible?'<button id="direct-failed">重新尝试安全派发（管理员）</button>':''):'<button id="activate-task" title="管理员：给旧任务绑定已批准的默认执行能力并尝试派发">激活 / 重新派发</button>'):''}</div>${t.status==='completed'?'<section class="dag-final-result"><h3>最终结果</h3><div id="dag-result-detail" aria-live="polite">正在加载最终结果…</div></section>':''}${taskTrace?.source_message?`<p class="hint">来源：会话 ${escape(taskTrace.source_message.session)} · 消息 ${escape(taskTrace.source_message.id.slice(0,8))}</p>`:''}<h3 style="margin-top:20px">相关事件</h3>${(taskTrace.events||[]).length?taskTrace.events.map(e=>`<div class="dag-evt"><div>${escape(e.kind)} #${e.id}</div><small>${new Date(e.created*1000).toLocaleString()}</small></div>`).join(''):'<p class="muted">暂无直接关联事件；普通 Worker 日志未绑定到本任务时不会显示。</p>'}`:'<p class="muted">加载任务轨迹...</p>'):'<p class="muted">选择一个任务节点，查看能力、状态、错误与关联事件。</p>';
