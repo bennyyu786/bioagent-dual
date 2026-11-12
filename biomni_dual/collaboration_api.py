@@ -941,6 +941,21 @@ def create_app(collaboration:CollaborationStore,tasks:TaskCenter,operations:Oper
                 return {'connected':False,'models_found':0,'error':{'type':'invalid_response','message':'Model provider returned non-JSON response'}}
         return await asyncio.to_thread(query)
 
+    @app.get('/api/v2/{ws}/models/status')
+    def model_status(ws:str,req:Request):
+        """Credential presence only; never expose the secret or test connectivity."""
+        user=member(req,ws)
+        info=collaboration.model_info(user['id'],ws)
+        configured=bool(info['configured'])
+        key_present=bool(os.getenv('BIOMNI_MODEL_API_KEY','').strip())
+        return {'configured':configured,'credentials_present':key_present,
+                'chat_ready':configured and key_present,
+                'message':('模型未配置，请管理员在模型连接中设置 URL 和模型'
+                           if not configured else
+                           '服务器缺少 BIOMNI_MODEL_API_KEY，请管理员配置环境变量并重启服务'
+                           if not key_present else
+                           '模型设置和密钥已存在；请使用模型发现测试连通性')}
+
     @app.get('/api/v2/{ws}/assistant/history')
     def assistant_history(ws:str,req:Request,kind:str='sessions',offset:int=0,limit:int=100):
         actor=member(req,ws)
@@ -1002,7 +1017,7 @@ def create_app(collaboration:CollaborationStore,tasks:TaskCenter,operations:Oper
             if not info['configured']:
                 raise HTTPException(409,'Model not configured; configure it under Model Connection')
             key=os.getenv('BIOMNI_MODEL_API_KEY','')
-            if not key:raise HTTPException(503,'Model credentials missing')
+            if not key:raise HTTPException(503,'服务器缺少 BIOMNI_MODEL_API_KEY；请管理员在服务端配置密钥并重启服务。也可选择「执行任务」提交不依赖聊天模型的任务。')
             history=collaboration.messages(actor['id'],ws,body.session)
             adapter=OpenAICompatibleAdvisor(info['base_url'],key,info['model'])
             try:
