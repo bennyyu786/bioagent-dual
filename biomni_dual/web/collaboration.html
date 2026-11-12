@@ -119,6 +119,9 @@ body.unified-home .homeactions .send{background:#191919!important;color:#fff!imp
 .conversation-column .homemessages{overflow-y:auto;min-height:0;flex:1;overscroll-behavior:contain}
 .conversation-column .homecomposer{position:relative!important;bottom:auto!important;flex:0 0 auto;margin-top:auto;margin-bottom:16px}
 .home-selection{font-size:12px;color:#666;overflow-wrap:anywhere}
+.home-model-warning{font-size:12px;color:#744b0f;background:#fff9ed;border:1px solid #ead7b8;border-radius:10px;padding:9px 12px}
+.home-model-warning button{font-size:12px;margin-left:8px;padding:3px 8px}
+.home-model-warning.hidden{display:none!important}
 .home-task-focus{border:1px solid #e5e5e5;border-radius:12px;padding:16px;background:#fff;margin-bottom:14px;white-space:pre-wrap;overflow-wrap:anywhere}
 .home-task-focus h3{margin:0 0 8px;font-size:16px}
 .home-task-focus .result-view{max-height:none;white-space:pre-wrap}
@@ -303,8 +306,9 @@ function onRealtimeEvent(evt){
 }
 
 function renderHome(target){
- target.innerHTML=`<section class="homepage" aria-label="Biomni AI 对话首页"><div class="homehead"><span id="home-selection" class="home-selection">工作区对话 · ${escape(ws)}</span><button id="new-conversation" type="button">＋ 新对话</button></div><div class="homehero" id="home-hero"><h1>有什么可以帮你？</h1><p>可以先提问，也可以描述需要完成的任务。</p></div><div id="home-messages" class="homemessages" aria-live="polite"></div><form id="home-form" class="homecomposer"><textarea id="home-input" rows="2" maxlength="4000" required placeholder="询问 Biomni，或描述你的任务…" aria-label="输入消息"></textarea><div class="homeactions"><div class="home-tools"><button type="button" class="homeplus" id="home-plus" aria-label="展开专业视图" title="展开专业视图">＋</button><select id="home-mode" aria-label="对话模式"><option value="auto">智能判断</option><option value="chat">仅对话</option><option value="task">执行任务</option></select></div><div class="home-tools"><span id="home-status" class="homestatus" role="status"></span><button type="button" id="home-mic" class="homemic" title="语音输入（支持的浏览器）" aria-label="语音输入">♩</button><button class="send" id="home-send" title="发送" aria-label="发送消息">↑</button></div></div></form></section>`;
+ target.innerHTML=`<section class="homepage" aria-label="Biomni AI 对话首页"><div class="homehead"><span id="home-selection" class="home-selection">工作区对话 · ${escape(ws)}</span><button id="new-conversation" type="button">＋ 新对话</button></div><div class="homehero" id="home-hero"><h1>有什么可以帮你？</h1><p>可以先提问，也可以描述需要完成的任务。</p></div><div id="home-messages" class="homemessages" aria-live="polite"></div><div id="home-model-warning" class="home-model-warning hidden" role="status"></div><form id="home-form" class="homecomposer"><textarea id="home-input" rows="2" maxlength="4000" required placeholder="询问 Biomni，或描述你的任务…" aria-label="输入消息"></textarea><div class="homeactions"><div class="home-tools"><button type="button" class="homeplus" id="home-plus" aria-label="展开专业视图" title="展开专业视图">＋</button><select id="home-mode" aria-label="对话模式"><option value="auto">智能判断</option><option value="chat">仅对话</option><option value="task">执行任务</option></select></div><div class="home-tools"><span id="home-status" class="homestatus" role="status"></span><button type="button" id="home-mic" class="homemic" title="语音输入（支持的浏览器）" aria-label="语音输入">♩</button><button class="send" id="home-send" title="发送" aria-label="发送消息">↑</button></div></div></form></section>`;
  el('home-form').onsubmit=sendUnifiedTurn;
+ updateModelStatus();
  el('home-input').onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();el('home-form').requestSubmit()}};
  el('new-conversation').onclick=()=>{chatSession='chat-'+crypto.randomUUID();historySelection={kind:'session',id:chatSession};loadUnifiedChat();renderHistory()};
  el('home-plus').onclick=()=>{const p=el('professional-views');p.open=!p.open;if(p.open)toast('可从最左侧图标栏进入专业视图')};
@@ -383,6 +387,21 @@ async function loadSelectedTask(){
  }catch(err){if(ws===workspace&&historySelection.kind==='task'&&historySelection.id===id)
    target.textContent='加载任务历史失败：'+err.message}
 }
+async function updateModelStatus(){
+ const warning=el('home-model-warning');if(!warning)return;
+ const workspace=ws;
+ try{
+  const state=await api(root()+'/models/status');
+  if(workspace!==ws||!el('home-model-warning'))return;
+  if(state.chat_ready){warning.classList.add('hidden');warning.innerHTML='';return}
+  warning.classList.remove('hidden');
+  warning.innerHTML='<span>'+escape(state.message)+'</span> <button type="button" id="home-model-settings">模型连接</button>';
+  warning.querySelector('button').onclick=()=>navigate('models');
+ }catch(err){if(workspace===ws&&el('home-model-warning')){
+  warning.classList.remove('hidden');
+  warning.textContent='无法检查模型连接：'+err.message;
+ }}
+}
 async function sendUnifiedTurn(e){
  e.preventDefault();if(homePending)return;
  const input=el('home-input'),message=input.value.trim(),mode=el('home-mode').value;
@@ -395,7 +414,7 @@ async function sendUnifiedTurn(e){
   input.value='';
   el('home-status').textContent=result.route==='chat'?'已回复':`任务 ${result.task_route||'已创建'} · ${result.dispatch?.state||'等待执行'}`;
   await loadUnifiedChat();await refreshHistory(true);
- }catch(err){if(destination===ws&&selection.kind===historySelection.kind&&selection.id===historySelection.id)el('home-status').textContent=err.message}
+ }catch(err){if(destination===ws&&selection.kind===historySelection.kind&&selection.id===historySelection.id){el('home-status').textContent=err.message;await updateModelStatus()}}
  finally{homePending=false;if(el('home-send'))el('home-send').disabled=false}
 }
 
